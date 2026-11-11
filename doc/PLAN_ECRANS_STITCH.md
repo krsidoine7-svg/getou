@@ -113,7 +113,7 @@ puis redéfinir le PIN. Mode sombre : reporté.
 - [x] 6.3 Créer / modifier / supprimer un plafond (`BudgetEditorModal`) : global ou catégorie, jour ou mois, seuil 80 / 85 / 90 % ; un seul plafond par couple catégorie / période
 - [x] 6.4 Carte « Suivi budgétaire en direct » sur l'accueil (ou invitation à fixer un budget)
 
-> Notifications de dépassement : étape 8.
+> Notifications de dépassement : ajoutées avec l'étape 8.
 
 ## Étape 7 — Agenda & échéances (3 écrans)
 | 26 | Agenda & Échéancier Financier | ✅ `AgendaScreen` |
@@ -130,12 +130,14 @@ puis redéfinir le PIN. Mode sombre : reporté.
 > À faire : reprogrammer les rappels après une restauration de sauvegarde sur un nouveau téléphone.
 
 ## Étape 8 — Notifications (2 écrans)
-| 29 | Notifications Push & Centre d'Alertes | ⬜ |
-| 30 | Historique des Alertes & Notifications | ⬜ |
-- [ ] 8.1 Table `notifications` + enregistrement de chaque alerte émise
-- [ ] 8.2 Centre d'alertes (non lues, marquer comme lu)
-- [ ] 8.3 Historique filtrable
-- [ ] 8.4 Réglages des types d'alertes (on/off)
+| 29 | Notifications Push & Centre d'Alertes | ✅ `NotificationSettingsScreen` |
+| 30 | Historique des Alertes & Notifications | ✅ `NotificationsScreen` |
+- [x] 8.1 Table `alerts` (clé anti-doublon, lu / résolu, purge à 90 jours, incluse dans la sauvegarde) ; alertes émises : plafond franchi puis dépassé (une fois par période), échéance dont l'heure de rappel est passée (résolue au paiement), sauvegarde Drive réussie — `alertCore.ts` (7 tests) et `alertRepo.ts` (4 tests sur SQLite)
+- [x] 8.2 `NotificationsScreen` (cloche de l'accueil, avec nombre de non lues) : sections Aujourd'hui / Cette semaine / Plus ancien, actions Régler, Ajuster le plafond, Ignorer, tout marquer lu
+- [x] 8.3 Filtres par type (Échéances, Budgets, Sauvegardes) et par état (Non lues, Action requise, Résolues)
+- [x] 8.4 `NotificationSettingsScreen` : autorisation, choix par type, masquer les montants, aperçu écran verrouillé, notification de test ; notification immédiate au franchissement d'un plafond — **notifications à tester sur téléphone**
+
+> Non repris : modes sonores (discret / vibreur), bilan quotidien à 20 h, alertes de stocks (étape 10).
 
 ## Étape 9 — Dettes & Projets (3 écrans)
 | 23 | Dettes, Créances & Engagements | ⬜ |

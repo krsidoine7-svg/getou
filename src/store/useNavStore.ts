@@ -19,6 +19,7 @@ export type ModuleScreen =
   | 'SETTINGS'
   | 'BACKUP'
   | 'DEADLINE_ALERT'
+  | 'NOTIF_SETTINGS'
   | 'TRASH';
 
 /** Saisies plein écran (sans barre d'onglets). */

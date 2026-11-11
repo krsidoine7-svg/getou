@@ -27,6 +27,7 @@ import {
 } from 'lucide-react-native';
 import { CategoryIcon, PROVENANCE_ICONS } from '../../components/common/AppIcons';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useAlertStore } from '../../store/useAlertStore';
 import { useWalletStore } from '../../store/useWalletStore';
 import { useTransactionStore } from '../../store/useTransactionStore';
 import { useNavStore } from '../../store/useNavStore';
@@ -78,6 +79,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onOpenNewExpen
   const { recentTransactions, fetchRecentTransactions, isLoading: isTxLoading } = useTransactionStore();
   const { navigate, switchTab } = useNavStore();
   const { budgets, refresh: refreshBudgets } = useBudgetStore();
+  const { unread, refresh: refreshAlerts } = useAlertStore();
 
   const [accountToDelete, setAccountToDelete] = useState<Account | null>(null);
   const [debts, setDebts] = useState({ owedToMe: 0, iOwe: 0 });
@@ -96,6 +98,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onOpenNewExpen
       loadSession().then(setSession),
       getLastSync().then(setLastSync),
       refreshBudgets(currentUser.id),
+      refreshAlerts(currentUser.id),
     ]);
   };
 
@@ -116,6 +119,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onOpenNewExpen
       setSyncing(true);
       await linkGoogleAccount(session.email);
       const info = await syncNow(session.accessToken, session.email);
+      if (currentUser) await useAlertStore.getState().afterBackup(currentUser.id, session.email, info.bytes);
       setLastSync(info);
       showToast({ kind: 'success', title: 'Sauvegarde envoyée', message: 'Vos données sont à jour sur Google Drive.' });
     } catch (e) {
@@ -165,8 +169,13 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onOpenNewExpen
             <Text style={styles.hello} numberOfLines={1}>Bonjour{firstName ? ` ${firstName}` : ''}</Text>
             <Text style={styles.helloSub}>Tableau de bord familial</Text>
           </View>
-          <Pressable onPress={() => navigate('NOTIFICATIONS')} hitSlop={8} accessibilityRole="button" accessibilityLabel="Notifications" style={styles.iconBtn}>
+          <Pressable onPress={() => navigate('NOTIFICATIONS')} hitSlop={8} accessibilityRole="button" accessibilityLabel={unread > 0 ? `Notifications, ${unread} non lues` : "Notifications"} style={styles.iconBtn}>
             <Bell size={20} color={colors.text.primary} />
+            {unread > 0 ? (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{unread > 9 ? '9+' : unread}</Text>
+              </View>
+            ) : null}
           </Pressable>
           <Pressable onPress={lockSession} hitSlop={8} accessibilityRole="button" accessibilityLabel="Verrouiller" style={styles.iconBtn}>
             <Lock size={20} color={colors.text.primary} />
@@ -457,6 +466,8 @@ const styles = StyleSheet.create({
   },
   hello: { fontSize: typography.sizes.title, fontWeight: typography.weights.bold, color: colors.text.primary },
   helloSub: { fontSize: typography.sizes.bodySm, color: colors.text.secondary },
+  badge: { position: 'absolute', top: 2, right: 2, minWidth: 16, height: 16, borderRadius: 8, paddingHorizontal: 3, backgroundColor: colors.accent.danger, alignItems: 'center', justifyContent: 'center' },
+  badgeText: { color: colors.text.inverted, fontSize: 10, fontWeight: typography.weights.bold },
   iconBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface.card },
   hero: { backgroundColor: colors.primary.DEFAULT, borderRadius: radii.xl, padding: spacing.lg },
   heroLabelRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },

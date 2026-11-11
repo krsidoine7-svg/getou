@@ -4,6 +4,8 @@
  */
 
 import { create } from 'zustand';
+import { useAlertStore } from './useAlertStore';
+import { KIND_CATEGORY } from '../services/agenda/deadlineCore';
 import * as Crypto from 'expo-crypto';
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { getDatabase, withTransaction } from '../services/db/database';
@@ -64,6 +66,8 @@ interface AgendaState {
   markPaid: (userId: string, deadlineId: string) => Promise<string | null>;
   postpone: (userId: string, deadlineId: string, days?: number) => Promise<string | null>;
   remove: (userId: string, deadlineId: string) => Promise<string | null>;
+  /** Annule puis reprogramme les rappels de toutes les échéances en attente (réglages, restauration). */
+  rescheduleAll: (userId: string) => Promise<void>;
 }
 
 export const useAgendaStore = create<AgendaState>((set, get) => ({
@@ -98,6 +102,7 @@ export const useAgendaStore = create<AgendaState>((set, get) => ({
       const before = get().deadlines.find((d) => d.id === deadlineId);
       const { nextId } = await withTransaction((db) => payDeadline(adapt(db), { userId, deadlineId, accountId }, newId));
       await cancelDeadlineReminder(before?.notification_id);
+      if (before) await useAlertStore.getState().afterExpense(userId, before.amount, KIND_CATEGORY[before.kind]);
       await reschedule(userId, nextId);
       await get().refresh(userId);
       return null;
@@ -128,6 +133,12 @@ export const useAgendaStore = create<AgendaState>((set, get) => ({
     } catch (e) {
       return message(e);
     }
+  },
+
+  rescheduleAll: async (userId) => {
+    const pending = await listDeadlines(await sqlDb(), userId);
+    for (const d of pending) await reschedule(userId, d.id);
+    await get().refresh(userId);
   },
 
   remove: async (userId, deadlineId) => {

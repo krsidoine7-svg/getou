@@ -3,6 +3,7 @@
  */
 
 import { create } from 'zustand';
+import { useAlertStore } from './useAlertStore';
 import {
   TransactionService,
   CreateExpenseParams,
@@ -69,6 +70,8 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
       set({ isLoading: true, error: null });
       const tx = await TransactionService.recordExpense(params);
       await get().fetchRecentTransactions(params.userId);
+      // Plafonds de budget franchis → alerte (+ notification selon les réglages)
+      await useAlertStore.getState().afterExpense(params.userId, params.amount, params.categoryId);
       set({ isLoading: false });
       return tx;
     } catch (err: any) {

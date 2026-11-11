@@ -261,7 +261,7 @@ export const BudgetsScreen: React.FC = () => {
         </View>
         <View style={styles.soon}>
           <Info size={16} color={colors.text.secondary} />
-          <Text style={styles.soonText}>Bientôt : une notification sur le téléphone quand un seuil est atteint.</Text>
+          <Text style={styles.soonText}>Une alerte est enregistrée (et notifiée sur le téléphone) dès qu'un seuil est atteint ou dépassé.</Text>
         </View>
       </ScrollView>
 

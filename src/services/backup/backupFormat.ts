@@ -27,6 +27,7 @@ export const BACKUP_TABLES = [
   'projects',
   'attachments',
   'audit_log',
+  'alerts',
 ] as const;
 
 export type BackupTable = (typeof BACKUP_TABLES)[number];

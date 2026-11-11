@@ -18,6 +18,7 @@ import {
 } from 'lucide-react-native';
 import { useNavStore } from '../../store/useNavStore';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useAlertStore } from '../../store/useAlertStore';
 import { useGoogleSignIn } from '../../hooks/useGoogleSignIn';
 import { GoogleSession, clearSession, isTokenValid, loadSession } from '../../services/google/googleSession';
 import { SyncInfo, fetchRemoteBackup, getLastSync, restoreBackup, syncNow } from '../../services/backup/syncService';
@@ -109,6 +110,7 @@ export const BackupScreen: React.FC = () => {
       setBusy('sync');
       await linkGoogleAccount(s.email);
       const info = await syncNow(s.accessToken, s.email);
+      if (currentUser) await useAlertStore.getState().afterBackup(currentUser.id, s.email, info.bytes);
       setLastSync(info);
       setMessage({ kind: 'ok', text: 'Sauvegarde envoyée sur Google Drive.' });
     } catch (e) {

@@ -198,6 +198,24 @@ CREATE TABLE IF NOT EXISTS deadlines (
 );
 CREATE INDEX IF NOT EXISTS idx_deadlines_due ON deadlines(user_id, status, due_date);
 
+CREATE TABLE IF NOT EXISTS alerts (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    kind TEXT NOT NULL CHECK (kind IN ('DEADLINE', 'BUDGET', 'BACKUP', 'INFO')),
+    level TEXT NOT NULL DEFAULT 'INFO' CHECK (level IN ('INFO', 'SUCCESS', 'WARNING', 'CRITICAL')),
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    ref_id TEXT,
+    dedupe_key TEXT UNIQUE,
+    meta TEXT,
+    created_at TEXT NOT NULL,
+    read_at TEXT,
+    resolved_at TEXT,
+    resolution TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_alerts_user ON alerts(user_id, created_at);
+
 CREATE TABLE IF NOT EXISTS attachments (
     id TEXT PRIMARY KEY,
     transaction_id TEXT NOT NULL,

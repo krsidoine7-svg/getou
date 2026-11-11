@@ -5,6 +5,7 @@
 
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
+import { AlertPrefs, DEFAULT_ALERT_PREFS } from '../alerts/alertCore';
 
 const ONBOARDING_DONE_KEY = 'geretou_onboarding_done';
 
@@ -63,4 +64,16 @@ export async function isOnboardingDone(): Promise<boolean> {
 
 export async function markOnboardingDone(): Promise<void> {
   await setItem(ONBOARDING_DONE_KEY, '1');
+}
+
+// ── Réglages des notifications ─────────────────────────
+
+const ALERT_PREFS_KEY = 'geretou_alert_prefs';
+
+export async function getAlertPrefs(): Promise<AlertPrefs> {
+  return { ...DEFAULT_ALERT_PREFS, ...((await getJSON<Partial<AlertPrefs>>(ALERT_PREFS_KEY)) ?? {}) };
+}
+
+export async function setAlertPrefs(prefs: AlertPrefs): Promise<void> {
+  await setJSON(ALERT_PREFS_KEY, prefs);
 }

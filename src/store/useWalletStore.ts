@@ -4,6 +4,7 @@
  */
 
 import { create } from 'zustand';
+import { useAlertStore } from './useAlertStore';
 import { AccountService, WalletSummary } from '../services/account/accountService';
 import type { TransferParams } from '../services/account/transferCore';
 import { Account, AccountType, AccountSubType } from '../types/database';
@@ -96,6 +97,7 @@ export const useWalletStore = create<WalletState>((set, get) => ({
       set({ isLoading: true, error: null });
       await AccountService.transfer(params);
       await get().fetchWallet(params.userId);
+      if (params.fees && params.fees > 0) await useAlertStore.getState().afterExpense(params.userId, params.fees, 'cat_frais');
       return null;
     } catch (err: any) {
       set({ isLoading: false, error: err.message });

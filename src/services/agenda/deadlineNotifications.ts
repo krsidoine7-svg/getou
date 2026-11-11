@@ -9,6 +9,8 @@ import { SchedulableTriggerInputTypes } from 'expo-notifications';
 import { reminderDate, dueLabel } from './deadlineCore';
 import type { Deadline } from './deadlineRepo';
 import { formatFCFA } from '../../theme/tokens';
+import { getAlertPrefs } from '../storage/prefs';
+import { maskAmounts } from '../alerts/alertCore';
 
 const CHANNEL_ID = 'echeances';
 export const NOTIFICATION_KIND = 'deadline';
@@ -45,13 +47,15 @@ async function ensurePermission(): Promise<boolean> {
  */
 export async function scheduleDeadlineReminder(d: Deadline): Promise<string | null> {
   if (!notificationsSupported || d.status !== 'PENDING') return null;
+  const prefs = await getAlertPrefs();
+  if (!prefs.deadlineReminders) return null;
   const when = reminderDate(d.due_date, d.remind_time, d.remind_days_before);
   if (when.getTime() <= Date.now()) return null;
   if (!(await ensurePermission())) return null;
   return Notifications.scheduleNotificationAsync({
     content: {
       title: `Échéance ${dueLabel(d.due_date, when).toLowerCase()} : ${d.title}`,
-      body: `${formatFCFA(d.amount)} à régler${d.account_name ? ` (prévu sur ${d.account_name})` : ''}. Touchez pour régler ou reporter.`,
+      body: maskAmounts(`${formatFCFA(d.amount)} à régler${d.account_name ? ` (prévu sur ${d.account_name})` : ''}. Touchez pour régler ou reporter.`, prefs.hideAmounts),
       data: { kind: NOTIFICATION_KIND, deadlineId: d.id },
     },
     trigger: { type: SchedulableTriggerInputTypes.DATE, date: when, channelId: CHANNEL_ID },
@@ -77,4 +81,29 @@ export function listenDeadlineTaps(onOpen: (deadlineId: string) => void): () => 
   Notifications.getLastNotificationResponseAsync().then(handle).catch(() => {});
   const sub = Notifications.addNotificationResponseReceivedListener(handle);
   return () => sub.remove();
+}
+
+/** Notification immédiate (alerte de budget, sauvegarde, test). Sans effet sur le web. */
+export async function notifyNow(title: string, body: string, data: Record<string, unknown> = {}): Promise<boolean> {
+  if (!notificationsSupported) return false;
+  await initDeadlineNotifications();
+  if (!(await ensurePermission())) return false;
+  const prefs = await getAlertPrefs();
+  await Notifications.scheduleNotificationAsync({
+    content: { title: maskAmounts(title, prefs.hideAmounts), body: maskAmounts(body, prefs.hideAmounts), data },
+    trigger: null,
+  });
+  return true;
+}
+
+/** État de l'autorisation des notifications sur le téléphone. */
+export async function notificationPermission(): Promise<'granted' | 'denied' | 'undetermined' | 'unsupported'> {
+  if (!notificationsSupported) return 'unsupported';
+  const p = await Notifications.getPermissionsAsync();
+  return p.granted ? 'granted' : p.canAskAgain ? 'undetermined' : 'denied';
+}
+
+export async function requestNotificationPermission(): Promise<boolean> {
+  if (!notificationsSupported) return false;
+  return ensurePermission();
 }
