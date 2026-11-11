@@ -116,14 +116,18 @@ puis redéfinir le PIN. Mode sombre : reporté.
 > Notifications de dépassement : étape 8.
 
 ## Étape 7 — Agenda & échéances (3 écrans)
-| 26 | Agenda & Échéancier Financier | ⬜ |
-| 27 | Nouvelle Deadline & Récurrence | ⬜ |
-| 28 | Alerte Échéance (24h avant) | ⬜ |
-- [ ] 7.1 Table `deadlines` (migration) + service CRUD
-- [ ] 7.2 Formulaire nouvelle échéance (montant, date, récurrence)
-- [ ] 7.3 Vue agenda (liste groupée par jour)
-- [ ] 7.4 Planification de la notification locale J-1
-- [ ] 7.5 Écran d'alerte ouvert depuis la notification (Payer / Reporter)
+| 26 | Agenda & Échéancier Financier | ✅ `AgendaScreen` |
+| 27 | Nouvelle Deadline & Récurrence | ✅ `DeadlineEditorModal` |
+| 28 | Alerte Échéance (24h avant) | ✅ `DeadlineAlertScreen` |
+- [x] 7.1 Table `deadlines` (type, date, heure, récurrence, jour d'ancrage, compte prévu, importance, rappel) + catégorie « Tontine & Cercle » ; incluse dans la sauvegarde Drive (sans l'id de notification)
+- [x] 7.2 `DeadlineEditorModal` : montant, intitulé, type, raccourcis de date (Demain, Dans 3 j, Fin de mois, Le 5 prochain), heure, rappel (jour J / veille / 3 j avant), récurrence avec règle lisible, compte prévu, importance
+- [x] 7.3 `AgendaScreen` : semaine avec points, total sous 7 jours, filtres par type, sections En retard / Urgent (48 h) / À venir
+- [x] 7.4 Rappel local programmé (`expo-notifications`), annulé / reprogrammé à chaque modification, règlement ou report — **à tester sur téléphone** (non disponible dans le navigateur)
+- [x] 7.5 `DeadlineAlertScreen` (ouvert depuis l'agenda ou en touchant le rappel) : compte à rebours, comptes avec « manque X F », Régler (dépense + débit + occurrence suivante), Déjà réglé, Repousser 24 h
+- Calculs : `deadlineCore.ts` (7 tests) et `deadlineRepo.ts` (7 tests sur SQLite)
+
+> Non repris : provision automatique en coffre, rappels de stocks (étape 10), solde prévisionnel, échéances de prêt (étape 9), compteur / n° de facture.
+> À faire : reprogrammer les rappels après une restauration de sauvegarde sur un nouveau téléphone.
 
 ## Étape 8 — Notifications (2 écrans)
 | 29 | Notifications Push & Centre d'Alertes | ⬜ |

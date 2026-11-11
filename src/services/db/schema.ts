@@ -173,6 +173,31 @@ CREATE TABLE IF NOT EXISTS audit_log (
 CREATE INDEX IF NOT EXISTS idx_audit_tx ON audit_log(transaction_id);
 
 -- Table 12: attachments
+CREATE TABLE IF NOT EXISTS deadlines (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    amount REAL NOT NULL,
+    kind TEXT NOT NULL DEFAULT 'BILL' CHECK (kind IN ('BILL', 'RENT', 'TONTINE', 'SUBSCRIPTION', 'OTHER')),
+    due_date TEXT NOT NULL,
+    remind_time TEXT NOT NULL DEFAULT '09:00',
+    remind_days_before INTEGER NOT NULL DEFAULT 1,
+    recurrence TEXT NOT NULL DEFAULT 'NONE' CHECK (recurrence IN ('NONE', 'WEEKLY', 'MONTHLY', 'QUARTERLY')),
+    anchor_day INTEGER,
+    account_id TEXT,
+    priority TEXT NOT NULL DEFAULT 'NORMAL' CHECK (priority IN ('NORMAL', 'HIGH', 'VITAL')),
+    status TEXT NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'PAID')),
+    paid_at TEXT,
+    paid_tx_id TEXT,
+    notification_id TEXT,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_deadlines_due ON deadlines(user_id, status, due_date);
+
 CREATE TABLE IF NOT EXISTS attachments (
     id TEXT PRIMARY KEY,
     transaction_id TEXT NOT NULL,
@@ -193,6 +218,7 @@ export const INITIAL_CATEGORIES = [
   { id: 'cat_loisirs', name: 'Loisirs & Sorties', icon: 'coffee', color: '#EC4899', type: 'EXPENSE', is_default: 1 },
   { id: 'cat_imprevus', name: 'Imprévus & Urgences', icon: 'alert-triangle', color: '#DC2626', type: 'EXPENSE', is_default: 1 },
   { id: 'cat_frais', name: 'Frais & commissions', icon: 'tag', color: '#64748B', type: 'EXPENSE', is_default: 1 },
+  { id: 'cat_tontine', name: 'Tontine & Cercle', icon: 'handshake', color: '#7C3AED', type: 'EXPENSE', is_default: 1 },
   { id: 'cat_salaire', name: 'Salaire Principal', icon: 'briefcase', color: '#0B4F3A', type: 'INCOME', is_default: 1 },
   { id: 'cat_freelance', name: 'Freelance & Business', icon: 'trending-up', color: '#059669', type: 'INCOME', is_default: 1 },
   { id: 'cat_dons', name: 'Cadeaux & Dons reçus', icon: 'gift', color: '#6366F1', type: 'INCOME', is_default: 1 },

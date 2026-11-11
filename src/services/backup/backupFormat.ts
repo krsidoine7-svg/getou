@@ -19,6 +19,7 @@ export const BACKUP_TABLES = [
   'categories',
   'accounts',
   'transactions',
+  'deadlines',
   'budgets',
   'stocks',
   'grocery_items',
@@ -34,6 +35,8 @@ type Row = Record<string, unknown>;
 /** Colonnes jamais exportées, par table. */
 const EXCLUDED_COLUMNS: Partial<Record<BackupTable, string[]>> = {
   users: ['pin_hash'],
+  // Identifiant de notification propre au téléphone : reprogrammé après restauration.
+  deadlines: ['notification_id'],
 };
 
 export interface BackupFile {

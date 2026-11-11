@@ -54,6 +54,7 @@ const CATEGORY_DISPLAY: Record<string, { short: string; hint: string }> = {
   cat_loisirs: { short: 'Loisirs', hint: 'Famille & sorties' },
   cat_imprevus: { short: 'Imprévus', hint: 'Dépannage, urgences' },
   cat_frais: { short: 'Frais', hint: 'Commissions Wave, MoMo…' },
+  cat_tontine: { short: 'Tontine', hint: 'Cotisation, cercle' },
 };
 
 export function categoryDisplay(cat: { id: string; name: string }): { short: string; hint: string } {
