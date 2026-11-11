@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GERETOU - Mes Portefeuilles &amp; Épargne</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary": "#0B4F3A",
+            "primary-container": "#D1E7DD",
+            "accent": "#F59E0B",
+            "surface": "#F8FAFC",
+            "outline": "#707974",
+            "on-primary": "#ffffff",
+          }
+        }
+      }
+    }
+</script>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex justify-center selection:bg-emerald-100 selection:text-emerald-900">
+<main class="w-full max-w-md bg-slate-50 flex flex-col min-h-screen relative pb-28">
+  <!-- Top App Bar -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur shadow-sm">
+    <div class="flex items-center justify-between px-4 h-16">
+      <div class="flex items-center gap-2">
+        <a href="01_accueil_dashboard.html" class="w-10 h-10 rounded-lg flex items-center justify-center text-slate-700 hover:bg-slate-100">
+          <span class="material-symbols-outlined text-2xl">arrow_back</span>
+        </a>
+        <div>
+          <h1 class="text-lg font-bold text-[#0B4F3A]">Comptes &amp; Mobile Money</h1>
+          <p class="text-xs text-slate-500">GERETOU Multi-Comptes</p>
+        </div>
+      </div>
+      <button onclick="alert('Nouveau compte créé avec solde initial !')" class="h-9 px-3 bg-[#0B4F3A] text-white rounded-lg flex items-center gap-1 text-xs font-semibold shadow-sm">
+        <span class="material-symbols-outlined text-base">add</span>
+        <span>Ajouter</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="px-4 pt-3 flex flex-col gap-4">
+    <!-- Patrimoine Liquide Consolidé -->
+    <section class="rounded-xl bg-[#0B4F3A] text-white p-4 shadow-lg">
+      <div class="flex items-center justify-between">
+        <span class="text-xs text-emerald-200 uppercase tracking-wider font-semibold">Patrimoine Total Disponible</span>
+        <span class="bg-white/10 px-2 py-0.5 rounded-full text-xs text-emerald-100">5 comptes</span>
+      </div>
+      <div class="mt-2 flex items-baseline gap-2">
+        <span class="text-3xl font-extrabold text-white">670 000</span>
+        <span class="text-sm font-bold text-emerald-200">FCFA</span>
+      </div>
+
+      <div class="mt-3 grid grid-cols-2 gap-2">
+        <div class="bg-black/20 rounded-lg p-2.5 flex flex-col">
+          <span class="text-xs text-emerald-300 font-semibold">Immédiat (Liquide)</span>
+          <span class="text-base font-bold text-white">485 000 FCFA</span>
+          <span class="text-[10px] text-emerald-200/80">Libre pour dépenses</span>
+        </div>
+        <div class="bg-black/20 rounded-lg p-2.5 flex flex-col">
+          <span class="text-xs text-amber-300 font-semibold">Coffres / Épargne</span>
+          <span class="text-base font-bold text-amber-200">185 000 FCFA</span>
+          <span class="text-[10px] text-amber-100/80">Fonds verrouillés</span>
+        </div>
+      </div>
+
+      <!-- Virement Interne Neutre -->
+      <div class="mt-3 pt-2 border-t border-white/15 flex items-center justify-between">
+        <span class="text-xs text-emerald-100">Transfert interne (Neutre)</span>
+        <button onclick="alert('✓ Virement interne de 25 000 FCFA effectué de Wave CI vers MTN MoMo sans impact budgétaire (neutre) !')" class="px-2.5 py-1 bg-emerald-100 text-[#0B4F3A] font-bold rounded-md text-xs flex items-center gap-1 shadow-sm">
+          <span>⇄ Virement Interne</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- RÈGLE STRICTE : MODALE DE BLOCAGE OBLIGATOIRE ET SOFT DELETE -->
+    <section class="bg-amber-50 border border-amber-300 rounded-xl p-3 flex flex-col gap-2">
+      <div class="flex items-center gap-2 text-amber-900 font-bold text-xs">
+        <span class="material-symbols-outlined text-base text-amber-600">warning</span>
+        <span>Règle de Clôture &amp; Soft Delete de Compte</span>
+      </div>
+      <p class="text-xs text-amber-800 leading-relaxed">
+        Testez la règle stricte : tentez de supprimer un compte avec du solde (Wave : 150 000 FCFA) pour voir le blocage obligatoire, ou videz-le pour voir l'archivage en Soft Delete.
+      </p>
+    </section>
+
+    <!-- Liste détaillée des Comptes -->
+    <section class="flex flex-col gap-3">
+      <!-- Wave CI -->
+      <article class="bg-white border border-slate-200 rounded-xl p-3.5 shadow-sm flex flex-col gap-2">
+        <div class="flex items-start justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 font-extrabold flex items-center justify-center text-sm">W</div>
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">Wave CI (Principal)</h3>
+              <p class="text-xs text-slate-500">+225 07 •••• 9210</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <p class="text-base font-extrabold text-slate-900">150 000 FCFA</p>
+            <span class="text-[11px] text-emerald-700 font-semibold">● Actif</span>
+          </div>
+        </div>
+
+        <div class="bg-slate-50 rounded-lg p-2 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-sm text-amber-600">lock</span>
+            <span class="font-medium text-slate-700">Coffre Wave (Verrouillé)</span>
+          </div>
+          <span class="font-bold text-[#0B4F3A]">50 000 FCFA</span>
+        </div>
+
+        <div class="flex justify-between items-center pt-2 border-t border-slate-100">
+          <span class="text-xs text-slate-400">ID: acc_wave_main</span>
+          <button onclick="testDeleteAccount('Wave CI', 150000)" class="text-xs font-bold text-red-600 hover:underline">
+            Clôturer / Supprimer
+          </button>
+        </div>
+      </article>
+
+      <!-- MTN MoMo -->
+      <article class="bg-white border border-slate-200 rounded-xl p-3.5 shadow-sm flex flex-col gap-2">
+        <div class="flex items-start justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 font-extrabold flex items-center justify-center text-sm">M</div>
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">MTN MoMo</h3>
+              <p class="text-xs text-slate-500">+225 05 •••• 1488</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <p class="text-base font-extrabold text-slate-900">120 000 FCFA</p>
+            <span class="text-[11px] text-emerald-700 font-semibold">● Actif</span>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center pt-2 border-t border-slate-100">
+          <span class="text-xs text-slate-400">ID: acc_momo_main</span>
+          <button onclick="testDeleteAccount('MTN MoMo', 120000)" class="text-xs font-bold text-red-600 hover:underline">
+            Clôturer / Supprimer
+          </button>
+        </div>
+      </article>
+
+      <!-- Compte Démo à Solde Zéro (Pour tester le Soft Delete) -->
+      <article class="bg-white border border-slate-200 rounded-xl p-3.5 shadow-sm flex flex-col gap-2">
+        <div class="flex items-start justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 font-extrabold flex items-center justify-center text-sm">C</div>
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">Ancien Compte Clôturable</h3>
+              <p class="text-xs text-slate-500">Solde vide (0 FCFA)</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <p class="text-base font-extrabold text-slate-400">0 FCFA</p>
+            <span class="text-[11px] text-slate-500 font-semibold">Prêt pour archivage</span>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center pt-2 border-t border-slate-100">
+          <span class="text-xs text-slate-400">ID: acc_zero_test</span>
+          <button onclick="testDeleteAccount('Ancien Compte Clôturable', 0)" class="text-xs font-bold text-emerald-700 hover:underline">
+            Archiver ce compte (Soft Delete)
+          </button>
+        </div>
+      </article>
+    </section>
+  </div>
+</main>
+
+<script>
+function testDeleteAccount(name, balance) {
+  if (balance > 0) {
+    alert('🔴 BLOCAGE OBLIGATOIRE DE SUPPRESSION :\n\n' +
+          'Le compte "' + name + '" contient encore un solde de ' + balance.toLocaleString('fr-FR') + ' FCFA.\n\n' +
+          'Conformément à la règle stricte de GERETOU, vous devez d\'abord transférer l\'intégralité des fonds vers un autre compte (ex: MTN MoMo ou Espèces) avant de pouvoir le clôturer.\n\n' +
+          '-> Utilisez le bouton "Virement Interne" ci-dessus pour vider le compte.');
+  } else {
+    const confirm = window.confirm('✓ COMPTE À SOLDE NUL (0 FCFA) :\n\n' +
+                                  'La suppression va appliquer un SOFT DELETE (is_archived = 1).\n\n' +
+                                  'Toutes les transactions passées restent conservées dans vos bilans pour l\'exactitude de vos comptes.\n\n' +
+                                  'Confirmer l\'archivage ?');
+    if (confirm) {
+      alert('✓ Compte archivé avec succès en Soft Delete !');
+    }
+  }
+}
+</script>
+</body>
+</html>

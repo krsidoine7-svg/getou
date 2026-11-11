@@ -1,0 +1,205 @@
+================================================================================
+GERETOU - CAHIER DES CHARGES DES FONCTIONNALITÉS
+Système de gestion financière, d'épargne, de stocks et de projets
+Architecture Offline-First (React Native Android/iOS, Next.js Web, Neon PostgreSQL)
+================================================================================
+
+--------------------------------------------------------------------------------
+MODULE 1 : SAISIE ET SUIVI DES DÉPENSES
+--------------------------------------------------------------------------------
+- Saisie ultra-rapide d'une dépense en quelques secondes
+- Enregistrement du montant de la dépense
+- Horodatage automatique précis (date, heure et minute de la saisie)
+- Choix ou création instantanée d'une catégorie (Alimentation, Transport, Santé, etc.)
+- Système de tags multiples (créer un nouveau tag ou sélectionner un tag existant)
+- Description détaillée de l'achat ("À quoi ça a servi")
+- Niveau d'urgence paramétrable (Faible, Normal, Important, Urgent)
+- Typologie de la dépense :
+  * Dépense régulière / récurrente (loyer, facture, abonnement)
+  * Dépense imprévue (panne, urgence médicale, etc.)
+  * Dépense remboursable (avance d'argent pour un tiers ou frais professionnels)
+- Sélection du compte de paiement source (Espèces, Wave, Orange Money, MoMo, Banque)
+- Possibilité d'attacher des pièces jointes (photos de reçus, tickets de caisse, factures)
+- Modification, annulation ou suppression d'une transaction avec traçabilité complète (historique des modifications / audit log)
+- Règle de cohérence stricte : la suppression ou modification d'une transaction ne doit jamais provoquer d'incohérence silencieuse dans les soldes, budgets ou stocks
+
+--------------------------------------------------------------------------------
+MODULE 2 : ENTRÉES D'ARGENT ET GAINS
+--------------------------------------------------------------------------------
+- Saisie rapide de chaque entrée d'argent (montant et date)
+- Provenance obligatoire de l'argent (Salaire, Prestation/Travail freelance, Don, Vente, Crédit/Emprunt, Autre)
+- Affectation directe au compte ou au coffre de destination
+- RÈGLE COMPTABLE STRICTE : un crédit/emprunt n'est pas comptabilisé comme un revenu, mais comme une dette à rembourser (ne fausse pas les statistiques de gains réels)
+- Description ou note explicative sur l'origine du montant
+- Historique complet des entrées d'argent
+
+--------------------------------------------------------------------------------
+MODULE 3 : MULTI-COMPTES, MOBILE MONEY ET ÉPARGNE
+--------------------------------------------------------------------------------
+- Création illimitée de comptes personnalisés (Wave, Orange Money, MTN MoMo, Espèces, Banque, Coffre-fort, etc.)
+- Attribution d'un logo ou d'une photo personnalisée pour chaque compte
+- Solde initial paramétrable et solde actuel recalculé automatiquement en temps réel
+- Historique détaillé de tous les mouvements et opérations par compte
+- Possibilité d'archiver un compte sans perdre l'historique de ses transactions
+- Transferts d'argent entre comptes (virements internes sans fausser les revenus ni les dépenses)
+- SPÉCIFICITÉ WAVE :
+  * Gestion des coffres intégrés (Vaults / sous-comptes à l'intérieur du compte Wave)
+  * Choix de faire une dépense ou un approvisionnement depuis le compte principal Wave ou depuis un coffre spécifique
+- SPÉCIFICITÉ MTN MOBILE MONEY (MoMo) :
+  * Distinction entre compte principal MoMo et compte épargne MoMo
+  * Règle de transfert automatique programmé à intervalles réguliers vers le compte épargne
+- Suivi du total de l'argent disponible vs argent réservé / épargné
+
+--------------------------------------------------------------------------------
+MODULE 4 : CRÉANCES, DETTES ET AVANCES
+--------------------------------------------------------------------------------
+- Suivi des Créances (argent que des personnes te doivent) :
+  * Nom de la personne, montant prêté, date du prêt, date de remboursement promise
+  * Suivi des remboursements partiels ou totaux
+  * Statut (En cours, En retard, Soldée)
+- Suivi des Dettes (argent que tu dois rembourser à des tiers ou institutions) :
+  * Montant emprunté, créancier, échéancier, montants déjà remboursés, reste à payer
+- Suivi des dépenses remboursables : marquage dès que la personne a remboursé
+
+--------------------------------------------------------------------------------
+MODULE 5 : GESTION DES BUDGETS ET CALCULS EN TEMPS RÉEL
+--------------------------------------------------------------------------------
+- Fixation d'un budget global mensuel
+- Fixation d'un budget journalier
+- Fixation de budgets spécifiques par catégorie (ex: Alimentation 50 000 F, Transport 20 000 F, Santé 15 000 F...)
+- Recalcul instantané et en direct à chaque saisie de dépense :
+  * Montant total dépensé aujourd'hui
+  * Montant total dépensé sur le mois en cours
+  * Montant du budget restant disponible
+  * Pourcentage de consommation du budget
+- Statut dynamique du budget : Dans le budget, Proche de la limite, Dépassé
+
+--------------------------------------------------------------------------------
+MODULE 6 : GESTION DES STOCKS DOMESTIQUES ET COURSES
+--------------------------------------------------------------------------------
+- Suivi des produits et consommables de la maison (Alimentation, Entretien, Hygiène, Boissons, etc.)
+- Informations par produit : Nom, catégorie/tags, quantité actuelle, unité (kg, litre, paquet, pièce), seuil d'alerte minimum
+- Calcul automatique du statut :
+  * "OK" (stock suffisant)
+  * "Stock bas" (quantité inférieure ou égale au seuil minimum)
+  * "Rupture" (quantité égale à 0)
+- Génération automatique de la liste de courses ("À acheter") dès qu'un produit passe en stock bas ou rupture
+- Date de dernière mise à jour du stock
+- Possibilité de déduire la quantité lors de la consommation ou de l'augmenter lors d'un achat
+
+--------------------------------------------------------------------------------
+MODULE 7 : PROJETS D'ACHATS ET ÉPARGNE DÉDIÉE
+--------------------------------------------------------------------------------
+- Création et suivi de projets ou achats futurs prévus
+- Fiche projet complète :
+  * Titre du projet
+  * Description détaillée
+  * Montant estimé nécessaire
+  * Date souhaitée de réalisation
+  * Niveau de priorité
+  * Catégorie et tags associés
+  * Montant déjà économisé / réservé
+  * Compte ou coffre assigné à la réserve d'argent
+  * Statut du projet (Idée, Planifié, En cours, Réalisé, Abandonné)
+- RÈGLE COMPTABLE STRICTE : le montant prévisionnel d'un projet ne déduit pas le solde courant ; seul l'argent physiquement réservé/déplacé dans un coffre ou compte épargne est considéré comme indisponible
+- Rappels et alertes dédiés à l'approche de la date d'un projet
+
+--------------------------------------------------------------------------------
+MODULE 8 : ALERTES ET NOTIFICATIONS (MÊME HORS-LIGNE ET APPLI FERMÉE)
+--------------------------------------------------------------------------------
+- Moteur de notifications locales sur smartphone (Android / iOS) fonctionnant sans Internet
+- Notifications déclenchées même si l'application ou le site est fermé :
+  * Alerte budget journalier dépassé
+  * Alerte budget mensuel proche de la limite (seuil à 80%) ou dépassé
+  * Alerte produit en rupture ou stock bas
+  * Alerte projet proche de sa date cible
+  * Alerte objectif d'épargne atteint
+  * Alerte dépense récurrente ou facture à venir
+- Rappels personnels programmables manuellement :
+  * Rappel de payer une facture (ex: Internet, Eau, Électricité)
+  * Rappel d'acheter un produit (ex: Riz, Détergent)
+  * Rappel d'épargner (ex: "Mettre 20 000 FCFA de côté")
+  * Rappel de vérification hebdomadaire des dépenses
+
+--------------------------------------------------------------------------------
+MODULE 9 : ARCHITECTURE OFFLINE-FIRST ET SYNCHRONISATION
+--------------------------------------------------------------------------------
+- Fonctionnement 100% autonome sans connexion internet :
+  * Aucune interruption de saisie ni de consultation
+  * Écriture immédiate dans la base locale (SQLite sur mobile / IndexedDB sur le web)
+  * Calculs locaux instantanés (soldes, budgets, dépenses du jour)
+  * Déclenchement local des alertes
+- File d'attente de synchronisation intelligente (Sync Queue) :
+  * Dès que le réseau Internet revient, synchronisation automatique en arrière-plan avec la base centrale Neon (PostgreSQL)
+  * Gestion et réconciliation des modifications sans perte de données
+  * Indicateur visuel du statut de synchronisation (En ligne / Hors-ligne / Synchronisé / En attente)
+
+--------------------------------------------------------------------------------
+MODULE 10 : DASHBOARD, ANALYSES ET RAPPORTS VISUELS
+--------------------------------------------------------------------------------
+- Tableau de bord synthétique en temps réel (KPIs) :
+  * Solde total disponible
+  * Répartition des soldes par compte
+  * Dépenses du jour
+  * Dépenses du mois
+  * Budget restant
+  * Montant total épargné
+  * Total des dettes à payer
+  * Total des créances à récupérer
+- Graphiques interactifs :
+  * Évolution des dépenses sur 7 jours, 30 jours, 3 mois et 12 mois
+  * Comparaison revenus vs dépenses
+  * Répartition des dépenses par catégorie (graphique circulaire)
+  * Répartition des avoirs par compte bancaire / mobile money
+  * Courbe d'évolution de l'épargne dans le temps
+  * Comparatif inter-mensuel des dépenses
+- Calendrier financier pour visualiser les rentrées, échéances de factures et dépenses prévues
+- Bilan mensuel automatique généré en fin de mois pour analyser son comportement financier
+
+--------------------------------------------------------------------------------
+MODULE 11 : RECHERCHE, FILTRES ET TRIS AVANCÉS
+--------------------------------------------------------------------------------
+- Moteur de recherche globale instantanée dans tout l'historique
+- Système de filtres globaux et par écran :
+  * Par période (Aujourd'hui, 7 derniers jours, ce mois, plage de dates personnalisée)
+  * Par compte (Wave, Orange, MoMo, Espèces, etc.)
+  * Par catégorie de dépense ou de stock
+  * Par tag
+  * Par niveau d'urgence
+  * Par nature (Prévue, Imprévue, Remboursable, Récurrente)
+- Tris multiples :
+  * Par date (plus récent / plus ancien)
+  * Par montant (croissant / décroissant)
+  * Par urgence
+  * Par ordre alphabétique
+
+--------------------------------------------------------------------------------
+MODULE 12 : SÉCURITÉ, AUTHENTIFICATION ET GESTION DES DONNÉES
+--------------------------------------------------------------------------------
+- Page de connexion et d'inscription sécurisée (Next.js, Auth.js)
+- Hachage cryptographique robuste des mots de passe (bcrypt)
+- Sessions sécurisées avec cookies HTTP-Only
+- Protection stricte contre les failles d'accès direct aux objets (anti-IDOR) avec cloisonnement étanche par utilisateur/foyer
+- Chiffrement complet des flux réseau via HTTPS
+- Protection des données sensibles stockées localement sur le smartphone
+- Exports multi-formats :
+  * Export en PDF
+  * Export en tableur Excel (.xlsx)
+  * Export en CSV
+- Système de sauvegarde et restauration :
+  * Sauvegardes cloud automatiques sur Neon
+  * Export manuel complet des données (fichier de sauvegarde JSON)
+  * Restauration complète des données à partir d'un fichier de sauvegarde
+- Gestion des sessions actives et déconnexion sécurisée des appareils
+
+--------------------------------------------------------------------------------
+MODULE 13 : ERGONOMIE, DESIGN SYSTEM ET EXPÉRIENCE UTILISATEUR
+--------------------------------------------------------------------------------
+- Palette de couleurs primaires et fortes : Vert forêt, Jaune or/ambre, Blanc pur
+- Design sobre, professionnel et premium :
+  * Angles et bordures nets (rayon maîtrisé, pas de formes trop arrondies)
+  * Surfaces épurées et lisibles, sans dégradés kitsch ou superflus
+  * Aucun contenu ou texte générique d'IA
+- 100% Responsive et adaptatif : smartphone (Android & iOS), tablette, écran PC
+================================================================================
+

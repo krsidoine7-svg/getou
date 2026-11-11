@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion Mobile Expo Go — GERETOU</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #071E17;
+      color: #FFFFFF;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: #0B4F3A;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 24px;
+      padding: 36px 32px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(230, 81, 0, 0.2);
+      color: #FFB74D;
+      border: 1px solid #FFB74D;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+    }
+    h1 {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    p.subtitle {
+      color: #A3D9C9;
+      font-size: 14px;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .qr-container {
+      background: #FFFFFF;
+      padding: 16px;
+      border-radius: 18px;
+      display: inline-block;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      margin-bottom: 24px;
+    }
+    .qr-container img {
+      display: block;
+      width: 240px;
+      height: 240px;
+    }
+    .url-box {
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      color: #E8F5E9;
+      word-break: break-all;
+      margin-bottom: 24px;
+      border: 1px dashed rgba(255,255,255,0.2);
+    }
+    .instructions {
+      text-align: left;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 16px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .instructions h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #FFB74D;
+      margin-bottom: 8px;
+    }
+    .instructions ol {
+      padding-left: 20px;
+    }
+    .instructions li {
+      margin-bottom: 6px;
+    }
+    .wifi-warning {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #E0E0E0;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 10px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="badge">TEST MOBILE EN DIRECT</div>
+    <h1>Scanner avec Expo Go</h1>
+    <p class="subtitle">Testez l'application native <strong>GERETOU</strong> directement sur votre smartphone Android ou iPhone.</p>
+
+    <div class="qr-container">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=exp%3A%2F%2F192.168.1.65%3A8081" alt="QR Code Expo Go">
+    </div>
+
+    <div class="url-box">
+      exp://192.168.1.65:8081
+    </div>
+
+    <div class="instructions">
+      <h3>Comment vous connecter :</h3>
+      <ol>
+        <li>Installez l'application <strong>Expo Go</strong> (sur Play Store ou App Store).</li>
+        <li><strong>Sur Android :</strong> Ouvrez Expo Go et appuyez sur <em>"Scan QR code"</em>, puis visez le QR code ci-dessus.</li>
+        <li><strong>Sur iPhone :</strong> Ouvrez l'application <em>Appareil photo</em> native, scannez le code et touchez la notification Expo Go.</li>
+      </ol>
+      <div class="wifi-warning">
+        💡 <strong>Pré-requis :</strong> Votre téléphone et votre PC doivent être connectés au même réseau Wi-Fi local.
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

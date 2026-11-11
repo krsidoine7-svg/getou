@@ -1,0 +1,65 @@
+{
+  "_comment": "Mots-clés par secteur, utilisés par scan_project.py pour produire des INDICES (jamais une conclusion). Mots en minuscules, sans accents obligatoires (la comparaison est insensible aux accents). Un mot est reconnu comme préfixe (panier -> paniers). Pour ajouter un secteur, copier un bloc.",
+  "sectors": {
+    "ecommerce": {
+      "label": "E-commerce / boutique en ligne",
+      "keywords": ["panier", "cart", "checkout", "commande", "order", "produit", "product", "stock", "inventory", "livraison", "shipping", "coupon", "promo", "catalogue", "wishlist", "sku"]
+    },
+    "marketplace": {
+      "label": "Marketplace / petites annonces",
+      "keywords": ["vendeur", "seller", "vendor", "annonce", "listing", "annonceur", "commission", "boutique", "avis", "review", "litige", "dispute", "moderation", "escrow", "sequestre", "signalement"]
+    },
+    "fintech": {
+      "label": "Fintech / paiement / crédit",
+      "keywords": ["wallet", "portefeuille", "transaction", "virement", "transfer", "kyc", "loan", "pret", "credit", "remboursement", "mobile money", "momo", "wave", "orange money", "mtn", "cinetpay", "paystack", "flutterwave", "kkiapay", "fedapay", "ledger", "iban", "solde", "balance", "epargne", "tontine", "echeance"]
+    },
+    "sante": {
+      "label": "Santé",
+      "keywords": ["patient", "medecin", "doctor", "ordonnance", "prescription", "consultation", "rendez-vous", "appointment", "dossier medical", "clinique", "clinic", "pharmacie", "pharmacy", "diagnostic", "hospital", "hopital", "allergie", "soignant"]
+    },
+    "education": {
+      "label": "Éducation / formation",
+      "keywords": ["eleve", "student", "etudiant", "enseignant", "teacher", "cours", "course", "classe", "bulletin", "grade", "inscription", "enrollment", "ecole", "school", "quiz", "lesson", "lecon", "scolarite", "formation", "certificat"]
+    },
+    "immobilier": {
+      "label": "Immobilier",
+      "keywords": ["bien immobilier", "property", "propriete", "loyer", "rent", "bail", "lease", "locataire", "tenant", "proprietaire", "landlord", "visite", "agence", "terrain", "appartement", "villa", "surface", "chambre", "lotissement"]
+    },
+    "transport_livraison": {
+      "label": "Transport / livraison / mobilité",
+      "keywords": ["chauffeur", "driver", "trajet", "trip", "ride", "livreur", "courier", "colis", "parcel", "tracking", "itineraire", "vehicule", "vehicle", "dispatch", "tarif", "course"]
+    },
+    "reservation_tourisme": {
+      "label": "Réservation / tourisme / hôtellerie",
+      "keywords": ["reservation", "booking", "hotel", "chambre", "room", "check-in", "sejour", "voyage", "billet", "ticket", "vol", "flight", "excursion", "disponibilite", "availability", "nuitee"]
+    },
+    "administration": {
+      "label": "Administration / services publics",
+      "keywords": ["dossier", "demande", "citoyen", "citizen", "usager", "guichet", "attestation", "certificat", "acte", "etat civil", "formulaire", "instruction", "mairie", "prefecture", "timbre", "recepisse", "agent"]
+    },
+    "saas_b2b": {
+      "label": "SaaS B2B / outil d'équipe",
+      "keywords": ["workspace", "organisation", "organization", "tenant", "team", "equipe", "abonnement", "subscription", "billing", "facture", "invoice", "seat", "api key", "webhook", "dashboard", "permission", "integration"]
+    },
+    "rh_recrutement": {
+      "label": "RH / recrutement",
+      "keywords": ["candidat", "candidate", "offre d'emploi", "job posting", "cv", "recrutement", "recruitment", "employe", "employee", "conge", "leave", "paie", "payroll", "entretien", "interview", "contrat"]
+    },
+    "restauration": {
+      "label": "Restauration / livraison de repas",
+      "keywords": ["plat", "dish", "restaurant", "cuisine", "kitchen", "ingredient", "serveur", "menu du jour", "carte des plats", "repas", "traiteur"]
+    },
+    "media_contenu": {
+      "label": "Média / contenu / communauté",
+      "keywords": ["article", "blog", "auteur", "author", "redaction", "newsletter", "podcast", "video", "abonne", "subscriber", "editorial", "categorie", "commentaire", "comment"]
+    },
+    "ong_dons": {
+      "label": "ONG / dons / associations",
+      "keywords": ["donation", "donateur", "donor", "campagne de dons", "benevole", "volunteer", "association", "adhesion", "membership", "cotisation", "projet social", "beneficiaire"]
+    },
+    "agriculture": {
+      "label": "Agriculture / agro-commerce",
+      "keywords": ["parcelle", "culture", "recolte", "harvest", "agriculteur", "farmer", "cooperative", "semence", "intrant", "elevage", "cheptel", "rendement", "planteur"]
+    }
+  }
+}

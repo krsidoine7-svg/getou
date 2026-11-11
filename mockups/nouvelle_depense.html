@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>GERETOU - Nouvelle Dépense</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-fixed": "#ffddb8",
+            "on-tertiary-fixed": "#2a1700",
+            "secondary-fixed-dim": "#b6cbc2",
+            "on-tertiary-container": "#f8a00f",
+            "outline": "#707974",
+            "background": "#f8f9ff",
+            "surface-container-lowest": "#ffffff",
+            "tertiary-container": "#633d00",
+            "primary": "#003626",
+            "on-secondary": "#ffffff",
+            "secondary-container": "#d1e7dd",
+            "primary-container": "#0b4f3a",
+            "surface-variant": "#d3e4fe",
+            "surface-dim": "#cbdbf5",
+            "surface-container-high": "#dce9ff",
+            "secondary": "#4f635b",
+            "inverse-on-surface": "#eaf1ff",
+            "on-primary-container": "#82c0a5",
+            "on-surface": "#0b1c30",
+            "on-error": "#ffffff",
+            "surface-bright": "#f8f9ff",
+            "tertiary-fixed-dim": "#ffb95f",
+            "error": "#ba1a1a",
+            "surface-container": "#e5eeff",
+            "primary-fixed": "#b1f0d3",
+            "on-primary-fixed-variant": "#0e513b",
+            "outline-variant": "#bfc9c2",
+            "inverse-primary": "#95d3b8",
+            "on-secondary-container": "#556961",
+            "error-container": "#ffdad6",
+            "on-secondary-fixed-variant": "#374b44",
+            "inverse-surface": "#213145",
+            "secondary-fixed": "#d1e7dd",
+            "surface-container-low": "#eff4ff",
+            "on-background": "#0b1c30",
+            "primary-fixed-dim": "#95d3b8",
+            "on-surface-variant": "#404944",
+            "surface": "#f8f9ff",
+            "on-secondary-fixed": "#0c1f19",
+            "tertiary": "#452900",
+            "on-tertiary-fixed-variant": "#653e00",
+            "surface-container-highest": "#d3e4fe",
+            "on-error-container": "#93000a",
+            "on-primary-fixed": "#002116",
+            "on-tertiary": "#ffffff",
+            "surface-tint": "#2c6952",
+            "on-primary": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-lg": "1.5rem",
+            "gutter": "1rem",
+            "space-xs": "0.25rem",
+            "gutter-mobile": "0.75rem",
+            "space-md": "1rem",
+            "margin-tablet": "1.5rem",
+            "margin-mobile": "1rem",
+            "space-sm": "0.5rem",
+            "margin": "1rem",
+            "space-xl": "2rem"
+          },
+          "fontFamily": {
+            "title-md": ["Plus Jakarta Sans"],
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "body-sm": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "currency-body": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "title-lg": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "currency-display": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "title-md": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "display-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "display-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "currency-body": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+            "title-lg": ["16px", { "lineHeight": "22px", "fontWeight": "600" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "currency-display": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill-1 {
+      font-variation-settings: 'FILL' 1;
+    }
+    /* Hide scrollbar for clean horizontal scrolling */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-slate-100 text-on-surface antialiased selection:bg-secondary-container selection:text-primary-container">
+<!-- Mobile Container Wrapper with strict max-w-md matching the system shell -->
+<div class="relative mx-auto flex min-h-screen w-full max-w-md flex-col bg-surface shadow-2xl pb-32">
+<!-- Offline Resilient Status Ribbon -->
+<div class="sticky top-0 z-40 flex items-center justify-between bg-amber-500/10 px-margin-mobile py-1 backdrop-blur-md border-b border-amber-500/20">
+<div class="flex items-center space-x-1.5">
+<span class="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
+<span class="text-label-sm font-label-sm font-semibold text-amber-900 tracking-tight">⚡ Hors-ligne · Sauvegarde locale instantanée</span>
+</div>
+<span class="material-symbols-outlined text-amber-800 text-[16px]" data-icon="cloud_off">cloud_off</span>
+</div>
+<!-- Modal Modal Top Header (Close modal style following Semantic Shell Task-focused guidelines) -->
+<header class="flex items-center justify-between px-margin-mobile pt-3 pb-2 bg-surface">
+<!-- Close Action -->
+<button aria-label="Fermer" class="flex h-10 w-10 items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-2xl font-bold" data-icon="close">close</span>
+</button>
+<!-- Center Segmented Switcher -->
+<div class="inline-flex rounded-lg bg-surface-container p-0.5 border border-outline-variant/30">
+<button class="rounded-md bg-primary-container px-4 py-1.5 text-label-md font-label-md text-surface-container-lowest font-semibold shadow-sm transition-all" type="button">
+          Dépense
+        </button>
+<button class="rounded-md px-4 py-1.5 text-label-md font-label-md text-on-surface-variant hover:text-on-surface transition-all" type="button">
+          Revenu
+        </button>
+</div>
+<!-- Quick Reset / Clear Helper -->
+<button aria-label="Réinitialiser" class="flex h-10 w-10 items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="refresh">refresh</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 px-margin-mobile space-y-space-md pt-1">
+<!-- HERO: Giant Amount Display & Preset Quick Adjusters -->
+<section class="rounded-xl bg-surface-container-lowest p-space-md border border-outline-variant/40 shadow-sm relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Montant décaissé</span>
+<div class="flex items-center gap-1 rounded bg-secondary-container/60 px-2 py-0.5 text-primary-container">
+<span class="material-symbols-outlined text-[14px]" data-icon="calculate">calculate</span>
+<span class="text-label-sm font-label-sm font-semibold">Mode rapide</span>
+</div>
+</div>
+<!-- Big Numerical Counter -->
+<div class="mt-2 flex items-baseline justify-between border-b border-outline-variant/20 pb-2">
+<div class="flex items-baseline space-x-space-xs">
+<span class="font-currency-display text-4xl sm:text-5xl font-extrabold tracking-tight text-on-surface" id="amount-val">15 000</span>
+<span class="text-title-lg font-title-lg font-bold text-secondary">FCFA</span>
+</div>
+<button aria-label="Effacer le montant" class="flex h-9 w-9 items-center justify-center rounded-full text-outline hover:text-error hover:bg-error-container/40 active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="backspace">backspace</span>
+</button>
+</div>
+<!-- Preset Amount Pills -->
+<div class="mt-3 flex items-center gap-space-xs overflow-x-auto no-scrollbar pt-0.5">
+<button class="flex-1 whitespace-nowrap rounded-md bg-surface-container px-2.5 py-1.5 text-center text-label-md font-label-md text-primary-container font-semibold hover:bg-secondary-container active:scale-95 transition-all" type="button">
+            +1 000
+          </button>
+<button class="flex-1 whitespace-nowrap rounded-md bg-surface-container px-2.5 py-1.5 text-center text-label-md font-label-md text-primary-container font-semibold hover:bg-secondary-container active:scale-95 transition-all" type="button">
+            +5 000
+          </button>
+<button class="flex-1 whitespace-nowrap rounded-md bg-secondary-container border border-primary-container/20 px-2.5 py-1.5 text-center text-label-md font-label-md text-primary-container font-bold active:scale-95 transition-all" type="button">
+            +10 000
+          </button>
+<button class="flex-1 whitespace-nowrap rounded-md bg-surface-container px-2.5 py-1.5 text-center text-label-md font-label-md text-primary-container font-semibold hover:bg-secondary-container active:scale-95 transition-all" type="button">
+            +25 000
+          </button>
+</div>
+</section>
+<!-- SECTION: Description Input ('À quoi ça a servi ?') -->
+<section class="space-y-1">
+<label class="text-label-sm font-label-sm font-semibold text-on-surface-variant flex items-center justify-between" for="expense-desc">
+<span>À quoi ça a servi ?</span>
+<span class="text-label-sm text-secondary font-normal">Reconnaissance vocale dispo</span>
+</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-[20px] text-outline" data-icon="edit_note">edit_note</span>
+<input class="h-12 w-full rounded-md border border-outline-variant/50 bg-surface-container-lowest pl-10 pr-20 text-body-md font-body-md text-on-surface placeholder:text-outline-variant focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container shadow-sm transition-all" id="expense-desc" placeholder="Ex: Riz, huile et légumes au marché" type="text" value="Riz, huile et légumes au marché"/>
+<div class="absolute right-2 flex items-center space-x-1">
+<button aria-label="Saisie vocale" class="flex h-8 w-8 items-center justify-center rounded-full text-primary-container bg-secondary-container/50 hover:bg-secondary-container active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="mic">mic</span>
+</button>
+<button aria-label="Effacer texte" class="flex h-8 w-8 items-center justify-center rounded-full text-outline hover:text-on-surface transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="cancel">cancel</span>
+</button>
+</div>
+</div>
+</section>
+<!-- SECTION: Source Account Selector (Horizontal Pill Cards) -->
+<section class="space-y-1.5">
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm font-semibold text-on-surface-variant uppercase tracking-wider">Compte source</span>
+<span class="text-label-sm font-label-sm font-medium text-primary-container">4 comptes dispo</span>
+</div>
+<div class="flex space-x-2.5 overflow-x-auto no-scrollbar pb-1 pt-0.5">
+<!-- Card 1: Wave (Active) -->
+<div class="min-w-[140px] flex-shrink-0 cursor-pointer rounded-lg border-2 border-primary-container bg-surface-container-lowest p-2.5 shadow-sm transition-all">
+<div class="flex items-center justify-between">
+<span class="inline-flex h-5 items-center rounded bg-sky-100 px-1.5 text-[10px] font-bold text-sky-800">WAVE</span>
+<span class="material-symbols-outlined text-primary-container text-[18px] fill-1" data-icon="check_circle" data-weight="fill">check_circle</span>
+</div>
+<div class="mt-2 text-title-md font-title-md text-on-surface">Wave Principal</div>
+<div class="text-label-sm font-label-sm text-secondary font-semibold">150 000 FCFA</div>
+</div>
+<!-- Card 2: MTN MoMo -->
+<div class="min-w-[140px] flex-shrink-0 cursor-pointer rounded-lg border border-outline-variant/40 bg-surface-container-lowest p-2.5 shadow-sm hover:border-outline transition-all">
+<div class="flex items-center justify-between">
+<span class="inline-flex h-5 items-center rounded bg-amber-100 px-1.5 text-[10px] font-bold text-amber-900">MTN MoMo</span>
+<span class="h-4 w-4 rounded-full border border-outline-variant"></span>
+</div>
+<div class="mt-2 text-title-md font-title-md text-on-surface">Compte MoMo</div>
+<div class="text-label-sm font-label-sm text-secondary">120 000 FCFA</div>
+</div>
+<!-- Card 3: Orange Money -->
+<div class="min-w-[140px] flex-shrink-0 cursor-pointer rounded-lg border border-outline-variant/40 bg-surface-container-lowest p-2.5 shadow-sm hover:border-outline transition-all">
+<div class="flex items-center justify-between">
+<span class="inline-flex h-5 items-center rounded bg-orange-100 px-1.5 text-[10px] font-bold text-orange-900">OM</span>
+<span class="h-4 w-4 rounded-full border border-outline-variant"></span>
+</div>
+<div class="mt-2 text-title-md font-title-md text-on-surface">Orange Money</div>
+<div class="text-label-sm font-label-sm text-secondary">65 000 FCFA</div>
+</div>
+<!-- Card 4: Espèces / Cash -->
+<div class="min-w-[140px] flex-shrink-0 cursor-pointer rounded-lg border border-outline-variant/40 bg-surface-container-lowest p-2.5 shadow-sm hover:border-outline transition-all">
+<div class="flex items-center justify-between">
+<span class="inline-flex h-5 items-center rounded bg-emerald-100 px-1.5 text-[10px] font-bold text-emerald-900">CASH</span>
+<span class="h-4 w-4 rounded-full border border-outline-variant"></span>
+</div>
+<div class="mt-2 text-title-md font-title-md text-on-surface">Espèces / Poche</div>
+<div class="text-label-sm font-label-sm text-secondary">20 000 FCFA</div>
+</div>
+</div>
+</section>
+<!-- SECTION: Categories Grid (2x4 Grid with visual badges) -->
+<section class="space-y-1.5">
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm font-semibold text-on-surface-variant uppercase tracking-wider">Catégorie</span>
+<span class="text-label-sm font-label-sm text-primary-container font-semibold cursor-pointer hover:underline">Gérer</span>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<!-- 1. Selected: Alimentation & Courses -->
+<button class="relative flex items-center space-x-2.5 rounded-lg border-2 border-primary-container bg-secondary-container/40 p-2.5 text-left transition-all" type="button">
+<div class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-container text-surface-container-lowest shadow-sm">
+<span class="material-symbols-outlined text-[20px]" data-icon="shopping_basket">shopping_basket</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="text-title-md font-title-md text-primary font-bold truncate">Alimentation</div>
+<div class="text-label-sm font-label-sm text-secondary truncate">Courses du foyer</div>
+</div>
+<span class="material-symbols-outlined text-[16px] text-primary-container fill-1" data-icon="check_circle" data-weight="fill">check_circle</span>
+</button>
+<!-- 2. Transport & Carburant -->
+<button class="flex items-center space-x-2.5 rounded-lg border border-outline-variant/50 bg-surface-container-lowest p-2.5 text-left hover:border-outline active:scale-[0.98] transition-all" type="button">
+<div class="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-container text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]" data-icon="directions_car">directions_car</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="text-title-md font-title-md text-on-surface truncate">Transport</div>
+<div class="text-label-sm font-label-sm text-secondary truncate">Carburant, taxi</div>
+</div>
+</button>
+<!-- 3. Logement & Loyer -->
+<button class="flex items-center space-x-2.5 rounded-lg border border-outline-variant/50 bg-surface-container-lowest p-2.5 text-left hover:border-outline active:scale-[0.98] transition-all" type="button">
+<div class="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-container text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]" data-icon="home">home</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="text-title-md font-title-md text-on-surface truncate">Logement</div>
+<div class="text-label-sm font-label-sm text-secondary truncate">Loyer &amp; charges</div>
+</div>
+</button>
+<!-- 4. Factures -->
+<button class="flex items-center space-x-2.5 rounded-lg border border-outline-variant/50 bg-surface-container-lowest p-2.5 text-left hover:border-outline active:scale-[0.98] transition-all" type="button">
+<div class="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-container text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]" data-icon="bolt">bolt</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="text-title-md font-title-md text-on-surface truncate">Factures</div>
+<div class="text-label-sm font-label-sm text-secondary truncate">Eau, Élec, Net</div>
+</div>
+</button>
+<!-- 5. Santé & Pharmacie -->
+<button class="flex items-center space-x-2.5 rounded-lg border border-outline-variant/50 bg-surface-container-lowest p-2.5 text-left hover:border-outline active:scale-[0.98] transition-all" type="button">
+<div class="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-container text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]" data-icon="local_hospital">local_hospital</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="text-title-md font-title-md text-on-surface truncate">Santé</div>
+<div class="text-label-sm font-label-sm text-secondary truncate">Pharmacie, soins</div>
+</div>
+</button>
+<!-- 6. Loisirs & Famille -->
+<button class="flex items-center space-x-2.5 rounded-lg border border-outline-variant/50 bg-surface-container-lowest p-2.5 text-left hover:border-outline active:scale-[0.98] transition-all" type="button">
+<div class="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-container text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]" data-icon="favorite">favorite</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="text-title-md font-title-md text-on-surface truncate">Loisirs</div>
+<div class="text-label-sm font-label-sm text-secondary truncate">Famille &amp; sorties</div>
+</div>
+</button>
+<!-- 7. Imprévus -->
+<button class="flex items-center space-x-2.5 rounded-lg border border-outline-variant/50 bg-surface-container-lowest p-2.5 text-left hover:border-outline active:scale-[0.98] transition-all" type="button">
+<div class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-800">
+<span class="material-symbols-outlined text-[20px]" data-icon="warning">warning</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="text-title-md font-title-md text-on-surface truncate">Imprévus</div>
+<div class="text-label-sm font-label-sm text-secondary truncate">Dépannage cash</div>
+</div>
+</button>
+<!-- 8. + Nouvelle Catégorie -->
+<button class="flex items-center justify-center space-x-2 rounded-lg border-2 border-dashed border-outline-variant bg-surface-container-low/50 p-2.5 text-center hover:bg-surface-container active:scale-[0.98] transition-all" type="button">
+<span class="material-symbols-outlined text-outline text-[20px]" data-icon="add_circle">add_circle</span>
+<span class="text-title-md font-title-md text-on-surface-variant">Nouvelle</span>
+</button>
+</div>
+</section>
+<!-- SECTION: Tags & Labels -->
+<section class="space-y-1.5">
+<span class="text-label-sm font-label-sm font-semibold text-on-surface-variant uppercase tracking-wider">Mots-clés &amp; Tags</span>
+<div class="flex flex-wrap items-center gap-1.5">
+<span class="inline-flex items-center space-x-1 rounded-full bg-primary-container px-3 py-1 text-label-md font-label-md text-surface-container-lowest font-medium shadow-xs">
+<span>#Marché</span>
+<span class="material-symbols-outlined text-[14px] cursor-pointer" data-icon="close">close</span>
+</span>
+<span class="inline-flex items-center space-x-1 rounded-full bg-primary-container px-3 py-1 text-label-md font-label-md text-surface-container-lowest font-medium shadow-xs">
+<span>#Famille</span>
+<span class="material-symbols-outlined text-[14px] cursor-pointer" data-icon="close">close</span>
+</span>
+<span class="inline-flex items-center space-x-1 rounded-full border border-outline-variant/60 bg-surface-container-lowest px-3 py-1 text-label-md font-label-md text-on-surface-variant cursor-pointer hover:bg-surface-container">
+<span>#MoisDeMai</span>
+</span>
+<button class="inline-flex items-center space-x-1 rounded-full border border-dashed border-outline px-2.5 py-1 text-label-md font-label-md text-primary-container hover:bg-secondary-container/40" type="button">
+<span class="material-symbols-outlined text-[14px]" data-icon="add">add</span>
+<span>Tag</span>
+</button>
+</div>
+</section>
+<!-- SECTION: Typology & Urgency Grid -->
+<section class="grid grid-cols-1 gap-2 pt-1">
+<!-- Typologie Segmented -->
+<div class="rounded-lg bg-surface-container-lowest p-2.5 border border-outline-variant/40 space-y-1.5">
+<div class="text-label-sm font-label-sm font-semibold text-on-surface-variant">Typologie de dépense</div>
+<div class="grid grid-cols-3 gap-1 rounded-md bg-surface-container p-1 text-center">
+<button class="rounded bg-surface-container-lowest py-1 text-label-sm font-label-sm font-bold text-primary-container shadow-xs" type="button">Régulière</button>
+<button class="rounded py-1 text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface" type="button">Imprévue</button>
+<button class="rounded py-1 text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface" type="button">Remboursable</button>
+</div>
+</div>
+<!-- Priority / Urgence chips -->
+<div class="flex items-center justify-between rounded-lg bg-surface-container-lowest p-2.5 border border-outline-variant/40">
+<div class="text-label-sm font-label-sm font-semibold text-on-surface-variant">Degré d'importance</div>
+<div class="flex items-center space-x-1">
+<span class="rounded-md border border-outline-variant/60 bg-surface-container-lowest px-2 py-1 text-label-sm font-label-sm text-on-surface-variant">Normal</span>
+<span class="rounded-md border border-amber-300 bg-amber-50 px-2 py-1 text-label-sm font-label-sm font-bold text-amber-800">Important</span>
+<span class="rounded-md border border-outline-variant/60 bg-surface-container-lowest px-2 py-1 text-label-sm font-label-sm text-on-surface-variant">Urgent</span>
+</div>
+</div>
+</section>
+<!-- SECTION: Receipt & Proof Attachment -->
+<section class="rounded-lg border border-dashed border-outline-variant/70 bg-surface-container-lowest p-3 shadow-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-3">
+<div class="relative flex h-12 w-12 items-center justify-center rounded-md bg-surface-container overflow-hidden border border-outline-variant/40">
+<img class="h-full w-full object-cover" data-alt="A clean flat-lay photo of a paper grocery store transaction receipt resting on a dark slate surface, lit by crisp studio lights, representing domestic expense verification in a minimalist financial app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPvLp2cFFdGdcc6v1pcidUrq1sU18WAFeLbAp1kAKfyiCMCuR97XLLytoQ6sykKPGXKnkWWH_DgYltOV6aPYSdVWQj3YJzhqQyXstO-MouGk5M0FwutWgIk9yzq_Ivllia6-OfNQiByi1lgSiS3vqUeGgxmKDAfFJLw-JgDLwW4P5hprnE7l9E3xEb-6jF97S007WrmemVVwuYjfbtmsQEqa5sV5kr51SGtTY23ED9oVbpOXSUZDR30K72FP3tf3K8fLoc3A-VlF8"/>
+<div class="absolute inset-0 bg-primary-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px] text-surface-container-lowest" data-icon="photo_camera">photo_camera</span>
+</div>
+</div>
+<div>
+<div class="text-title-md font-title-md text-on-surface">Reçu ou ticket joint</div>
+<div class="text-label-sm font-label-sm text-secondary">ticket_marche_08mai.jpg (1.2 Mo)</div>
+</div>
+</div>
+<button aria-label="Remplacer le reçu" class="flex h-8 w-8 items-center justify-center rounded-full text-outline hover:text-primary-container hover:bg-surface-container" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="cached">cached</span>
+</button>
+</div>
+</section>
+</main>
+<!-- STICKY BOTTOM BAR (Express Validation in 3 clicks) -->
+<div class="fixed bottom-0 left-0 right-0 z-50 mx-auto w-full max-w-md bg-surface-container-lowest/95 px-margin-mobile pt-2.5 pb-4 backdrop-blur-md shadow-[0_-4px_16px_rgba(15,23,42,0.06)] border-t border-outline-variant/20">
+<button class="w-full flex items-center justify-center space-x-2 rounded-md bg-primary-container py-3.5 px-4 text-surface-container-lowest shadow-md hover:bg-primary active:scale-[0.98] transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="check">check</span>
+<span class="text-title-lg font-title-lg font-bold tracking-tight">Valider la dépense (15 000 FCFA)</span>
+</button>
+<!-- Reassuring Sync Subtitle -->
+<div class="mt-1.5 flex items-center justify-center space-x-1 text-center">
+<span class="material-symbols-outlined text-[14px] text-primary-container" data-icon="offline_pin">offline_pin</span>
+<span class="text-label-sm font-label-sm text-secondary font-medium">Enregistrement local immédiat (sync automatique dès connexion)</span>
+</div>
+</div>
+</div>
+<!-- Interactive script for quick preset amounts demo -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const amountEl = document.getElementById('amount-val');
+      const presetButtons = document.querySelectorAll('button[class*="+"]');
+      
+      presetButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const text = btn.innerText.trim();
+          if (text.startsWith('+')) {
+            const addVal = parseInt(text.replace('+', '').replace(/\s/g, ''), 10);
+            let current = parseInt(amountEl.innerText.replace(/\s/g, ''), 10) || 0;
+            current += addVal;
+            amountEl.innerText = current.toLocaleString('fr-FR');
+          }
+        });
+      });
+    });
+  </script>
+</body></html>

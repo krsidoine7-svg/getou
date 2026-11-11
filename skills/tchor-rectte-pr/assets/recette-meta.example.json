@@ -1,0 +1,12 @@
+{
+  "title": "Cahier de Recette",
+  "platform": "Nom officiel de la plateforme",
+  "environment": "Staging",
+  "url": "https://staging.exemple.ci",
+  "version": "1.0",
+  "date": "",
+  "author": "Nom du rédacteur",
+  "logo": "public/logo.png",
+  "primary_color": "#1E293B",
+  "accent_color": "#1E293B"
+}

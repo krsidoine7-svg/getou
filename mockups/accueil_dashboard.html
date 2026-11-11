@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+
+<html class="light" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>GERETOU - Gestion Financière Hors-ligne</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "inverse-surface": "#213145",
+            "surface-container-low": "#eff4ff",
+            "outline": "#707974",
+            "primary-fixed-dim": "#95d3b8",
+            "on-primary-fixed-variant": "#0e513b",
+            "on-surface": "#0b1c30",
+            "surface-container-highest": "#d3e4fe",
+            "surface-bright": "#f8f9ff",
+            "inverse-on-surface": "#eaf1ff",
+            "surface": "#f8f9ff",
+            "secondary": "#4f635b",
+            "primary-container": "#0b4f3a",
+            "secondary-fixed-dim": "#b6cbc2",
+            "on-primary-fixed": "#002116",
+            "on-tertiary-fixed": "#2a1700",
+            "surface-tint": "#2c6952",
+            "primary": "#003626",
+            "on-tertiary-container": "#f8a00f",
+            "tertiary-container": "#633d00",
+            "surface-container-high": "#dce9ff",
+            "on-primary": "#ffffff",
+            "tertiary-fixed": "#ffddb8",
+            "on-tertiary-fixed-variant": "#653e00",
+            "error": "#ba1a1a",
+            "on-surface-variant": "#404944",
+            "secondary-fixed": "#d1e7dd",
+            "on-error-container": "#93000a",
+            "surface-dim": "#cbdbf5",
+            "surface-variant": "#d3e4fe",
+            "surface-container": "#e5eeff",
+            "outline-variant": "#bfc9c2",
+            "on-secondary": "#ffffff",
+            "background": "#f8f9ff",
+            "on-tertiary": "#ffffff",
+            "on-background": "#0b1c30",
+            "secondary-container": "#d1e7dd",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary-fixed-variant": "#374b44",
+            "inverse-primary": "#95d3b8",
+            "on-secondary-container": "#556961",
+            "tertiary": "#452900",
+            "on-secondary-fixed": "#0c1f19",
+            "on-error": "#ffffff",
+            "tertiary-fixed-dim": "#ffb95f",
+            "primary-fixed": "#b1f0d3",
+            "error-container": "#ffdad6",
+            "on-primary-container": "#82c0a5"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-lg": "1.5rem",
+            "space-xl": "2rem",
+            "margin-mobile": "1rem",
+            "space-xs": "0.25rem",
+            "gutter-mobile": "0.75rem",
+            "margin-tablet": "1.5rem",
+            "margin": "1rem",
+            "space-md": "1rem",
+            "space-sm": "0.5rem",
+            "gutter": "1rem"
+          },
+          "fontFamily": {
+            "headline-lg": ["Plus Jakarta Sans"],
+            "title-md": ["Plus Jakarta Sans"],
+            "title-lg": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "body-sm": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "currency-body": ["Plus Jakarta Sans"],
+            "currency-display": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "title-md": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "title-lg": ["16px", { "lineHeight": "22px", "fontWeight": "600" }],
+            "display-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "display-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+            "currency-body": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "currency-display": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface antialiased min-h-screen pb-28">
+<!-- Mobile Shell Wrapper (Centered Max Width) -->
+<div class="max-w-md mx-auto min-h-screen flex flex-col relative bg-background">
+<!-- Top Status Banner: Offline / Sync Status -->
+<div class="w-full bg-secondary-fixed text-on-primary-fixed-variant px-margin-mobile py-1 flex items-center justify-between font-label-sm text-label-sm">
+<div class="flex items-center space-x-1.5">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-surface-tint opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-primary-container"></span>
+</span>
+<span class="font-semibold">Hors-ligne / Sync locale prête</span>
+</div>
+<div class="flex items-center space-x-1 opacity-80">
+<span class="material-symbols-outlined text-[14px]">cloud_done</span>
+<span>Sauvegardé</span>
+</div>
+</div>
+<!-- Top Navigation Bar (Derived from Shared Component JSON) -->
+<header class="flex justify-between items-center w-full px-margin-mobile h-16 bg-surface">
+<div class="flex items-center space-x-3">
+<div class="relative w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border border-outline-variant/40 overflow-hidden shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Portrait photoréaliste et lumineux d'un jeune chef de famille africain moderne et souriant nommé Alex, habillé d'une chemise élégante dans un intérieur urbain contemporain, éclairage naturel chaleureux, tonalités douces et professionnelles." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBR6tf18u7QxWegbOBAzsxT_udJWSorgYKBsNKyVJK81jh3x8Xtu7Xa-TivM54nY_VIk5JOG0fNuhtxe5V_vR0lxse74ebzCogBsZ_qLtZTzm_H12WJDGq95dy4qDCDw5ZJLCDGSkEulSmcVzgPDEpZoOaUgtwb7SLyhdZ7qZKELreu7PGM72LR8MyQjVslSfP0WONeor5_lIXk-3Hy8hESao91POi8oG0ltIdHc7uncscvvahmEXIk7QDgAGF-9hl-0_Hjgo9JhDs"/>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center space-x-1.5">
+<span class="font-headline-sm text-headline-sm text-on-surface">Bonjour Alex</span>
+<span class="material-symbols-outlined text-[18px] text-tertiary-fixed-dim" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Tableau de bord familial</span>
+</div>
+</div>
+<div class="flex items-center space-x-2">
+<button aria-label="Notifications" class="relative p-2 rounded-lg hover:bg-surface-container-high transition-colors active:scale-95 duration-150 text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface"></span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 px-margin-mobile space-y-space-md mt-1">
+<!-- Hero Widget: Total Available Balance Card -->
+<section class="relative overflow-hidden rounded-xl bg-primary-container text-on-primary p-space-md shadow-md">
+<!-- Visual geometric accent curves in background -->
+<div class="absolute -right-12 -top-12 w-44 h-44 rounded-full bg-white/5 pointer-events-none blur-xl"></div>
+<div class="absolute right-4 bottom-0 w-28 h-28 rounded-full border border-white/10 pointer-events-none"></div>
+<div class="relative z-10 flex flex-col justify-between space-y-space-md">
+<!-- Top Row of Card -->
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-1.5 text-on-primary-container">
+<span class="material-symbols-outlined text-[16px]">account_balance_wallet</span>
+<span class="font-label-md text-label-md tracking-wider">Solde total disponible</span>
+</div>
+<div class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>+12% ce mois</span>
+</div>
+</div>
+<!-- Balance Figure -->
+<div class="my-1">
+<div class="flex items-baseline space-x-space-xs">
+<span class="font-currency-display text-currency-display font-extrabold tracking-tight text-surface-container-lowest">485 000</span>
+<span class="font-currency-body text-currency-body font-bold text-on-primary-container">FCFA</span>
+</div>
+<p class="font-body-sm text-body-sm text-primary-fixed-dim/90 mt-0.5">Calculé hors-ligne sur 4 portefeuilles actifs</p>
+</div>
+<!-- Quick Action Buttons -->
+<div class="grid grid-cols-3 gap-space-sm pt-2">
+<button class="flex flex-col items-center justify-center py-2 px-1 rounded-lg bg-surface-container-lowest text-primary-container font-label-md text-label-md active:scale-95 transition-transform duration-150 shadow-sm font-semibold">
+<div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center mb-1 text-primary-container">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</div>
+<span>+ Dépense</span>
+</button>
+<button class="flex flex-col items-center justify-center py-2 px-1 rounded-lg bg-white/10 hover:bg-white/15 text-white font-label-md text-label-md active:scale-95 transition-transform duration-150 backdrop-blur-sm">
+<div class="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center mb-1 text-on-primary">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</div>
+<span>+ Entrée</span>
+</button>
+<button class="flex flex-col items-center justify-center py-2 px-1 rounded-lg bg-white/10 hover:bg-white/15 text-white font-label-md text-label-md active:scale-95 transition-transform duration-150 backdrop-blur-sm">
+<div class="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center mb-1 text-on-primary">
+<span class="material-symbols-outlined text-[18px]">sync_alt</span>
+</div>
+<span>Transfert</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Multi-Account Horizontal Carousel -->
+<section class="space-y-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-1.5">
+<h2 class="font-title-lg text-title-lg text-on-surface">Mes Comptes &amp; Portefeuilles</h2>
+<span class="inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-surface-container-high text-on-surface-variant">4</span>
+</div>
+<button class="font-label-md text-label-md text-primary-container font-semibold hover:underline">Voir tout</button>
+</div>
+<div class="flex space-x-space-sm overflow-x-auto no-scrollbar -mx-margin-mobile px-margin-mobile pb-1">
+<!-- Card Wave -->
+<div class="min-w-[155px] max-w-[165px] flex-shrink-0 bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-sm flex flex-col justify-between shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-surface-container-low text-primary-container">Wave</span>
+<span class="material-symbols-outlined text-[16px] text-surface-tint">account_balance_wallet</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Disponible</span>
+<span class="font-currency-body text-currency-body font-bold text-on-surface">150 000 <span class="text-xs">FCFA</span></span>
+</div>
+<div class="mt-2 pt-2 border-t border-outline-variant/20 flex items-center justify-between text-on-surface-variant font-label-sm text-[11px]">
+<span>Coffre</span>
+<span class="font-semibold text-on-surface">50 000 F</span>
+</div>
+</div>
+<!-- Card MTN MoMo -->
+<div class="min-w-[155px] max-w-[165px] flex-shrink-0 bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-sm flex flex-col justify-between shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-tertiary-fixed text-on-tertiary-fixed-variant">MTN MoMo</span>
+<span class="material-symbols-outlined text-[16px] text-tertiary">smartphone</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Disponible</span>
+<span class="font-currency-body text-currency-body font-bold text-on-surface">120 000 <span class="text-xs">FCFA</span></span>
+</div>
+<div class="mt-2 pt-2 border-t border-outline-variant/20 flex items-center justify-between text-on-surface-variant font-label-sm text-[11px]">
+<span>Épargne</span>
+<span class="font-semibold text-on-surface">80 000 F</span>
+</div>
+</div>
+<!-- Card Orange Money -->
+<div class="min-w-[155px] max-w-[165px] flex-shrink-0 bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-sm flex flex-col justify-between shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-surface-container-high text-on-surface">Orange Money</span>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">contactless</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Disponible</span>
+<span class="font-currency-body text-currency-body font-bold text-on-surface">65 000 <span class="text-xs">FCFA</span></span>
+</div>
+<div class="mt-2 pt-2 border-t border-outline-variant/20 flex items-center justify-between text-on-surface-variant font-label-sm text-[11px]">
+<span>Statut</span>
+<span class="font-semibold text-on-primary-fixed-variant">Actif</span>
+</div>
+</div>
+<!-- Card Cash -->
+<div class="min-w-[155px] max-w-[165px] flex-shrink-0 bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-sm flex flex-col justify-between shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-secondary-container text-on-secondary-fixed-variant">Espèces</span>
+<span class="material-symbols-outlined text-[16px] text-primary-container">payments</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Dans la poche</span>
+<span class="font-currency-body text-currency-body font-bold text-on-surface">20 000 <span class="text-xs">FCFA</span></span>
+</div>
+<div class="mt-2 pt-2 border-t border-outline-variant/20 flex items-center justify-between text-on-surface-variant font-label-sm text-[11px]">
+<span>Physique</span>
+<span class="font-semibold text-on-surface">Manuel</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Real-time Budget Progress Widget -->
+<section class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-md shadow-sm space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-1.5">
+<span class="material-symbols-outlined text-primary-container text-[18px]">donut_large</span>
+<h3 class="font-title-lg text-title-lg text-on-surface">Suivi Budgétaire en direct</h3>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-secondary-fixed text-on-primary-fixed-variant font-semibold">Mai 2024</span>
+</div>
+<div>
+<div class="flex justify-between items-baseline mb-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Consommé : <strong class="text-on-surface font-semibold">68%</strong> (238 000 FCFA)</span>
+<span class="font-label-md text-label-md font-bold text-on-surface">350 000 FCFA</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full h-2.5 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full rounded-full bg-tertiary-fixed-dim" style="width: 68%;"></div>
+</div>
+</div>
+<div class="pt-2 border-t border-outline-variant/20 flex items-center justify-between text-on-surface-variant">
+<div class="flex items-center space-x-1.5">
+<span class="material-symbols-outlined text-[16px] text-surface-tint">timelapse</span>
+<span class="font-body-sm text-body-sm">Plafond quotidien restant</span>
+</div>
+<span class="font-label-lg text-label-lg font-bold text-primary-container">12 500 / 20 000 FCFA</span>
+</div>
+</section>
+<!-- Quick Debt & Credit Summary Chips -->
+<section class="grid grid-cols-2 gap-space-sm">
+<!-- Créances (On vous doit) -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-sm shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Créances</span>
+<div class="w-6 h-6 rounded-full bg-secondary-fixed flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[14px]">arrow_downward</span>
+</div>
+</div>
+<span class="font-label-sm text-[10px] text-on-surface-variant">On vous doit</span>
+<div class="mt-1">
+<span class="font-currency-body text-currency-body font-bold text-primary-container">+45 000</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant"> FCFA</span>
+</div>
+</div>
+<!-- Dettes (Vous devez) -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-space-sm shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Dettes</span>
+<div class="w-6 h-6 rounded-full bg-error-container flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+</div>
+</div>
+<span class="font-label-sm text-[10px] text-on-surface-variant">Vous devez</span>
+<div class="mt-1">
+<span class="font-currency-body text-currency-body font-bold text-error">-15 000</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant"> FCFA</span>
+</div>
+</div>
+</section>
+<!-- Recent Transactions List -->
+<section class="space-y-space-sm pt-1">
+<div class="flex items-center justify-between">
+<h3 class="font-title-lg text-title-lg text-on-surface">Dernières Opérations</h3>
+<button class="font-label-md text-label-md text-primary-container font-semibold hover:underline">Historique</button>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-lg divide-y divide-outline-variant/20 shadow-sm overflow-hidden">
+<!-- Item 1: Courses Alimentation -->
+<div class="flex items-center justify-between p-space-sm hover:bg-surface-container-low transition-colors">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">shopping_cart</span>
+</div>
+<div>
+<h4 class="font-title-md text-title-md text-on-surface">Courses Alimentation</h4>
+<div class="flex items-center space-x-2 mt-0.5">
+<span class="font-label-sm text-[10px] px-1.5 py-0.2 rounded bg-surface-container-high text-primary-container font-semibold">Wave</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Il y a 2h</span>
+</div>
+</div>
+</div>
+<div class="text-right">
+<span class="font-currency-body text-currency-body font-bold text-error">-15 000 FCFA</span>
+<span class="block font-label-sm text-[10px] text-on-surface-variant">Dépense ménage</span>
+</div>
+</div>
+<!-- Item 2: Recharge Internet -->
+<div class="flex items-center justify-between p-space-sm hover:bg-surface-container-low transition-colors">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">wifi</span>
+</div>
+<div>
+<h4 class="font-title-md text-title-md text-on-surface">Recharge Internet</h4>
+<div class="flex items-center space-x-2 mt-0.5">
+<span class="font-label-sm text-[10px] px-1.5 py-0.2 rounded bg-tertiary-fixed text-on-tertiary-fixed-variant font-semibold">MoMo</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Hier, 18:30</span>
+</div>
+</div>
+</div>
+<div class="text-right">
+<span class="font-currency-body text-currency-body font-bold text-error">-10 000 FCFA</span>
+<span class="block font-label-sm text-[10px] text-on-surface-variant">Forfait maison</span>
+</div>
+</div>
+<!-- Item 3: Vente bien d'occasion -->
+<div class="flex items-center justify-between p-space-sm hover:bg-surface-container-low transition-colors">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+</div>
+<div>
+<h4 class="font-title-md text-title-md text-on-surface">Vente bien d'occasion</h4>
+<div class="flex items-center space-x-2 mt-0.5">
+<span class="font-label-sm text-[10px] px-1.5 py-0.2 rounded bg-secondary-container text-on-secondary-fixed-variant font-semibold">Espèces</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">24 Mai</span>
+</div>
+</div>
+</div>
+<div class="text-right">
+<span class="font-currency-body text-currency-body font-bold text-primary-container">+25 000 FCFA</span>
+<span class="block font-label-sm text-[10px] text-surface-tint">Recette vente</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Contextual Quick Action Floating Center Button -->
+<div class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50">
+<button aria-label="Ajout rapide transaction" class="w-14 h-14 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-[0_4px_16px_rgba(11,79,58,0.4)] border-2 border-surface-container-lowest hover:bg-primary active:scale-95 transition-all duration-150">
+<span class="material-symbols-outlined text-[28px] text-tertiary-fixed-dim">add</span>
+</button>
+</div>
+<!-- Bottom Navigation Bar (Faithfully mapped from Shared Components JSON) -->
+<!-- Active State: 'Accueil' is active for the Mobile Home Dashboard screen -->
+<nav class="fixed bottom-0 left-0 w-full z-40 bg-surface-container-lowest shadow-[0_4px_12px_-2px_rgba(15,23,42,0.08)]">
+<div class="flex justify-around items-center px-margin-mobile py-space-xs max-w-md mx-auto h-16">
+<!-- Tab 1: Accueil (Active) -->
+<a class="flex flex-col items-center justify-center text-primary-container font-semibold active:scale-95 transition-transform duration-150" href="#accueil">
+<span class="material-symbols-outlined text-[22px]" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-label-sm font-label-sm mt-0.5">Accueil</span>
+</a>
+<!-- Tab 2: Dépenses -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-colors active:scale-95 duration-150" href="#depenses">
+<span class="material-symbols-outlined text-[22px]" data-icon="receipt_long">receipt_long</span>
+<span class="text-label-sm font-label-sm mt-0.5">Dépenses</span>
+</a>
+<!-- Space holder for elevated central FAB -->
+<div class="w-10"></div>
+<!-- Tab 3: Stocks -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-colors active:scale-95 duration-150" href="#stocks">
+<span class="material-symbols-outlined text-[22px]" data-icon="inventory_2">inventory_2</span>
+<span class="text-label-sm font-label-sm mt-0.5">Stocks</span>
+</a>
+<!-- Tab 4: Projets -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-colors active:scale-95 duration-150" href="#projets">
+<span class="material-symbols-outlined text-[22px]" data-icon="savings">savings</span>
+<span class="text-label-sm font-label-sm mt-0.5">Projets</span>
+</a>
+<!-- Tab 5: Paramètres -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary-container transition-colors active:scale-95 duration-150" href="#parametres">
+<span class="material-symbols-outlined text-[22px]" data-icon="settings">settings</span>
+<span class="text-label-sm font-label-sm mt-0.5">Paramètres</span>
+</a>
+</div>
+</nav>
+</div>
+</body></html>

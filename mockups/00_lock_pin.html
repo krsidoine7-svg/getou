@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GERETOU — Déverrouillage Sécurisé</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0B4F3A',
+                        'primary-container': '#D1E7DD',
+                        accent: '#F59E0B',
+                        surface: '#F8FAFC',
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#F8FAFC] text-slate-900 font-sans min-h-screen flex flex-col justify-between p-6 select-none max-w-[420px] mx-auto">
+    <!-- Header Sécurité -->
+    <header class="pt-6 flex flex-col items-center text-center">
+        <div class="w-14 h-14 rounded-2xl bg-[#0B4F3A] text-white flex items-center justify-center shadow-lg shadow-emerald-900/20 mb-3">
+            <span class="material-symbols-outlined text-3xl font-bold">lock</span>
+        </div>
+        <h1 class="text-xl font-extrabold text-slate-900">GERETOU</h1>
+        <p class="text-xs text-slate-500 mt-0.5">Session protégée localement (Bcrypt + SecureStore)</p>
+        
+        <div class="mt-4 flex items-center gap-2 bg-emerald-50 border border-emerald-200/80 px-3 py-1 rounded-full">
+            <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+            <span class="text-xs font-semibold text-emerald-800">Alex Konan (Mode Hors-Ligne Prêt)</span>
+        </div>
+    </header>
+
+    <!-- PIN Dots -->
+    <main class="my-auto flex flex-col items-center">
+        <div class="text-sm font-bold text-slate-700 mb-4 tracking-wide">ENTREZ VOTRE CODE PIN</div>
+        
+        <div id="pin-dots" class="flex items-center space-x-5 mb-3">
+            <div class="pin-dot w-4 h-4 rounded-full border-2 border-slate-300 transition-all duration-200" id="dot-0"></div>
+            <div class="pin-dot w-4 h-4 rounded-full border-2 border-slate-300 transition-all duration-200" id="dot-1"></div>
+            <div class="pin-dot w-4 h-4 rounded-full border-2 border-slate-300 transition-all duration-200" id="dot-2"></div>
+            <div class="pin-dot w-4 h-4 rounded-full border-2 border-slate-300 transition-all duration-200" id="dot-3"></div>
+        </div>
+
+        <p id="error-msg" class="text-xs text-red-600 font-medium h-4 transition-opacity opacity-0">Code PIN incorrect</p>
+    </main>
+
+    <!-- Keypad 3x4 -->
+    <footer class="pb-4 flex flex-col items-center w-full">
+        <div class="grid grid-cols-3 gap-4 w-full max-w-[300px] mb-4">
+            <button onclick="pressDigit('1')" class="h-16 rounded-2xl bg-white border border-slate-200 text-2xl font-bold text-slate-800 shadow-sm active:scale-95 active:bg-slate-100 transition-all">1</button>
+            <button onclick="pressDigit('2')" class="h-16 rounded-2xl bg-white border border-slate-200 text-2xl font-bold text-slate-800 shadow-sm active:scale-95 active:bg-slate-100 transition-all">2</button>
+            <button onclick="pressDigit('3')" class="h-16 rounded-2xl bg-white border border-slate-200 text-2xl font-bold text-slate-800 shadow-sm active:scale-95 active:bg-slate-100 transition-all">3</button>
+
+            <button onclick="pressDigit('4')" class="h-16 rounded-2xl bg-white border border-slate-200 text-2xl font-bold text-slate-800 shadow-sm active:scale-95 active:bg-slate-100 transition-all">4</button>
+            <button onclick="pressDigit('5')" class="h-16 rounded-2xl bg-white border border-slate-200 text-2xl font-bold text-slate-800 shadow-sm active:scale-95 active:bg-slate-100 transition-all">5</button>
+            <button onclick="pressDigit('6')" class="h-16 rounded-2xl bg-white border border-slate-200 text-2xl font-bold text-slate-800 shadow-sm active:scale-95 active:bg-slate-100 transition-all">6</button>
+
+            <button onclick="pressDigit('7')" class="h-16 rounded-2xl bg-white border border-slate-200 text-2xl font-bold text-slate-800 shadow-sm active:scale-95 active:bg-slate-100 transition-all">7</button>
+            <button onclick="pressDigit('8')" class="h-16 rounded-2xl bg-white border border-slate-200 text-2xl font-bold text-slate-800 shadow-sm active:scale-95 active:bg-slate-100 transition-all">8</button>
+            <button onclick="pressDigit('9')" class="h-16 rounded-2xl bg-white border border-slate-200 text-2xl font-bold text-slate-800 shadow-sm active:scale-95 active:bg-slate-100 transition-all">9</button>
+
+            <button onclick="triggerBiometrics()" class="h-16 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-center active:scale-95 transition-all" title="Empreinte / Face ID">
+                <span class="material-symbols-outlined text-3xl">fingerprint</span>
+            </button>
+            <button onclick="pressDigit('0')" class="h-16 rounded-2xl bg-white border border-slate-200 text-2xl font-bold text-slate-800 shadow-sm active:scale-95 active:bg-slate-100 transition-all">0</button>
+            <button onclick="pressBackspace()" class="h-16 rounded-2xl bg-white border border-slate-200 text-slate-600 flex items-center justify-center active:scale-95 transition-all">
+                <span class="material-symbols-outlined text-2xl">backspace</span>
+            </button>
+        </div>
+
+        <!-- Option B Recovery Link -->
+        <button onclick="forgotPin()" class="text-xs font-semibold text-slate-500 hover:text-emerald-700 underline py-2">
+            Code PIN oublié ? (Option B : Réinitialisation e-mail)
+        </button>
+        <p class="text-[10px] text-slate-400 mt-1">Sécurité matérielle : 3 essais max avant temporisation</p>
+    </footer>
+
+    <script>
+        let currentPin = '';
+        function updateDots() {
+            for (let i = 0; i < 4; i++) {
+                const dot = document.getElementById('dot-' + i);
+                if (i < currentPin.length) {
+                    dot.classList.add('bg-[#0B4F3A]', 'border-[#0B4F3A]', 'scale-110');
+                    dot.classList.remove('border-slate-300');
+                } else {
+                    dot.classList.remove('bg-[#0B4F3A]', 'border-[#0B4F3A]', 'scale-110');
+                    dot.classList.add('border-slate-300');
+                }
+            }
+        }
+
+        function pressDigit(d) {
+            if (currentPin.length < 4) {
+                currentPin += d;
+                updateDots();
+                if (currentPin.length === 4) {
+                    setTimeout(() => {
+                        window.location.href = '01_accueil_dashboard.html';
+                    }, 200);
+                }
+            }
+        }
+
+        function pressBackspace() {
+            if (currentPin.length > 0) {
+                currentPin = currentPin.slice(0, -1);
+                updateDots();
+            }
+        }
+
+        function triggerBiometrics() {
+            alert('✓ Empreinte digitale reconnue avec succès (Face ID / Touch ID) !');
+            window.location.href = '01_accueil_dashboard.html';
+        }
+
+        function forgotPin() {
+            alert('Option B Sélectionnée :\nUn lien de réinitialisation sécurisé sera envoyé à votre adresse e-mail dès détection de réseau.');
+        }
+    </script>
+</body>
+</html>

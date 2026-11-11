@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GERETOU — Galerie Complète des Maquettes UI (12 Écrans)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-emerald-900/50">G</div>
+            <div>
+                <h1 class="text-lg font-bold text-white flex items-center gap-2">GERETOU <span class="text-xs font-semibold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">Forest Ledger Design System</span></h1>
+                <p class="text-xs text-slate-400">Application Mobile Native Offline-First (Android & iOS)</p>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2 text-xs text-slate-300">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full font-medium bg-emerald-950 text-emerald-400 border border-emerald-800">
+                <span class="w-2 h-2 mr-1.5 bg-emerald-400 rounded-full animate-pulse"></span> 12 Écrans & Flux Interconnectés
+            </span>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="flex-1 flex overflow-hidden">
+        <!-- Sidebar Navigation -->
+        <aside class="w-80 bg-slate-850 border-r border-slate-700/80 p-4 overflow-y-auto space-y-2 flex-shrink-0">
+            <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 px-3 py-2">Écrans du Projet (Parcours complet)</div>
+            <button onclick="selectScreen('00_inscription_auth.html', '00. Inscription & Connexion')" id="btn-1" class="w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 flex items-center justify-between group border border-transparent hover:bg-slate-800 hover:border-slate-700 text-slate-300 hover:text-white">
+                <div class="flex items-center space-x-3 truncate">
+                    <span class="w-5 h-5 rounded bg-slate-800 text-slate-400 text-[10px] flex items-center justify-center font-bold border border-slate-700 group-hover:border-emerald-600 group-hover:text-emerald-400">0</span>
+                    <span class="truncate font-semibold text-xs">00. Inscription & Connexion</span>
+                </div>
+            </button>
+            <button onclick="selectScreen('00_lock_pin.html', '01. Verrouillage PIN & Biométrie')" id="btn-2" class="w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 flex items-center justify-between group border border-transparent hover:bg-slate-800 hover:border-slate-700 text-slate-300 hover:text-white">
+                <div class="flex items-center space-x-3 truncate">
+                    <span class="w-5 h-5 rounded bg-slate-800 text-slate-400 text-[10px] flex items-center justify-center font-bold border border-slate-700 group-hover:border-emerald-600 group-hover:text-emerald-400">1</span>
+                    <span class="truncate font-semibold text-xs">01. Verrouillage PIN & Biométrie</span>
+                </div>
+            </button>
+            <button onclick="selectScreen('01_accueil_dashboard.html', '02. Accueil & Tableau de bord')" id="btn-3" class="w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 flex items-center justify-between group border border-transparent hover:bg-slate-800 hover:border-slate-700 text-slate-300 hover:text-white">
+                <div class="flex items-center space-x-3 truncate">
+                    <span class="w-5 h-5 rounded bg-slate-800 text-slate-400 text-[10px] flex items-center justify-center font-bold border border-slate-700 group-hover:border-emerald-600 group-hover:text-emerald-400">2</span>
+                    <span class="truncate font-semibold text-xs">02. Accueil & Tableau de bord</span>
+                </div>
+            </button>
+            <button onclick="selectScreen('02_nouvelle_depense.html', '03. Nouvelle Dépense (Saisie express)')" id="btn-4" class="w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 flex items-center justify-between group border border-transparent hover:bg-slate-800 hover:border-slate-700 text-slate-300 hover:text-white">
+                <div class="flex items-center space-x-3 truncate">
+                    <span class="w-5 h-5 rounded bg-slate-800 text-slate-400 text-[10px] flex items-center justify-center font-bold border border-slate-700 group-hover:border-emerald-600 group-hover:text-emerald-400">3</span>
+                    <span class="truncate font-semibold text-xs">03. Nouvelle Dépense (Saisie express)</span>
+                </div>
+            </button>
+            <button onclick="selectScreen('03_nouveau_revenu.html', '04. Nouveau Revenu / Gain')" id="btn-5" class="w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 flex items-center justify-between group border border-transparent hover:bg-slate-800 hover:border-slate-700 text-slate-300 hover:text-white">
+                <div class="flex items-center space-x-3 truncate">
+                    <span class="w-5 h-5 rounded bg-slate-800 text-slate-400 text-[10px] flex items-center justify-center font-bold border border-slate-700 group-hover:border-emerald-600 group-hover:text-emerald-400">4</span>
+                    <span class="truncate font-semibold text-xs">04. Nouveau Revenu / Gain</span>
+                </div>
+            </button>
+            <button onclick="selectScreen('04_portefeuilles_momo.html', '05. Portefeuilles & Mobile Money')" id="btn-6" class="w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 flex items-center justify-between group border border-transparent hover:bg-slate-800 hover:border-slate-700 text-slate-300 hover:text-white">
+                <div class="flex items-center space-x-3 truncate">
+                    <span class="w-5 h-5 rounded bg-slate-800 text-slate-400 text-[10px] flex items-center justify-center font-bold border border-slate-700 group-hover:border-emerald-600 group-hover:text-emerald-400">5</span>
+                    <span class="truncate font-semibold text-xs">05. Portefeuilles & Mobile Money</span>
+                </div>
+            </button>
+            <button onclick="selectScreen('05_budgets_plafonds.html', '06. Budgets & Plafonds en direct')" id="btn-7" class="w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 flex items-center justify-between group border border-transparent hover:bg-slate-800 hover:border-slate-700 text-slate-300 hover:text-white">
+                <div class="flex items-center space-x-3 truncate">
+                    <span class="w-5 h-5 rounded bg-slate-800 text-slate-400 text-[10px] flex items-center justify-center font-bold border border-slate-700 group-hover:border-emerald-600 group-hover:text-emerald-400">6</span>
+                    <span class="truncate font-semibold text-xs">06. Budgets & Plafonds en direct</span>
+                </div>
+            </button>
+            <button onclick="selectScreen('06_stocks_courses.html', '07. Stocks Domestiques & Courses')" id="btn-8" class="w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 flex items-center justify-between group border border-transparent hover:bg-slate-800 hover:border-slate-700 text-slate-300 hover:text-white">
+                <div class="flex items-center space-x-3 truncate">
+                    <span class="w-5 h-5 rounded bg-slate-800 text-slate-400 text-[10px] flex items-center justify-center font-bold border border-slate-700 group-hover:border-emerald-600 group-hover:text-emerald-400">7</span>
+                    <span class="truncate font-semibold text-xs">07. Stocks Domestiques & Courses</span>
+                </div>
+            </button>
+            <button onclick="selectScreen('07_dettes_creances.html', '08. Dettes, Créances & Engagements')" id="btn-9" class="w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 flex items-center justify-between group border border-transparent hover:bg-slate-800 hover:border-slate-700 text-slate-300 hover:text-white">
+                <div class="flex items-center space-x-3 truncate">
+                    <span class="w-5 h-5 rounded bg-slate-800 text-slate-400 text-[10px] flex items-center justify-center font-bold border border-slate-700 group-hover:border-emerald-600 group-hover:text-emerald-400">8</span>
+                    <span class="truncate font-semibold text-xs">08. Dettes, Créances & Engagements</span>
+                </div>
+            </button>
+            <button onclick="selectScreen('08_projets_epargne.html', '09. Projets d'Achat & Cagnottes')" id="btn-10" class="w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 flex items-center justify-between group border border-transparent hover:bg-slate-800 hover:border-slate-700 text-slate-300 hover:text-white">
+                <div class="flex items-center space-x-3 truncate">
+                    <span class="w-5 h-5 rounded bg-slate-800 text-slate-400 text-[10px] flex items-center justify-center font-bold border border-slate-700 group-hover:border-emerald-600 group-hover:text-emerald-400">9</span>
+                    <span class="truncate font-semibold text-xs">09. Projets d'Achat & Cagnottes</span>
+                </div>
+            </button>
+            <button onclick="selectScreen('09_analyses_statistiques.html', '10. Analyses & Graphiques Financiers')" id="btn-11" class="w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 flex items-center justify-between group border border-transparent hover:bg-slate-800 hover:border-slate-700 text-slate-300 hover:text-white">
+                <div class="flex items-center space-x-3 truncate">
+                    <span class="w-5 h-5 rounded bg-slate-800 text-slate-400 text-[10px] flex items-center justify-center font-bold border border-slate-700 group-hover:border-emerald-600 group-hover:text-emerald-400">10</span>
+                    <span class="truncate font-semibold text-xs">10. Analyses & Graphiques Financiers</span>
+                </div>
+            </button>
+            <button onclick="selectScreen('10_parametres_profil.html', '11. Paramètres, Profil & Soft Delete')" id="btn-12" class="w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 flex items-center justify-between group border border-transparent hover:bg-slate-800 hover:border-slate-700 text-slate-300 hover:text-white">
+                <div class="flex items-center space-x-3 truncate">
+                    <span class="w-5 h-5 rounded bg-slate-800 text-slate-400 text-[10px] flex items-center justify-center font-bold border border-slate-700 group-hover:border-emerald-600 group-hover:text-emerald-400">11</span>
+                    <span class="truncate font-semibold text-xs">11. Paramètres, Profil & Soft Delete</span>
+                </div>
+            </button>
+        </aside>
+
+        <!-- Preview Canvas -->
+        <main class="flex-1 bg-slate-950 flex flex-col items-center justify-center p-6 relative overflow-auto">
+            <div class="flex items-center justify-between w-full max-w-[420px] mb-3 px-2">
+                <span id="current-title" class="text-sm font-bold text-emerald-400 truncate">00. Inscription & Connexion</span>
+                <a id="open-tab" href="00_inscription_auth.html" target="_blank" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 bg-slate-800 px-2.5 py-1 rounded border border-slate-700">
+                    Ouvrir en plein écran ↗
+                </a>
+            </div>
+
+            <!-- Smartphone Frame -->
+            <div class="w-[390px] h-[844px] bg-slate-900 rounded-[48px] p-3 shadow-2xl shadow-black/80 ring-1 ring-slate-700/80 relative flex flex-col">
+                <!-- Dynamic Island / Speaker notch -->
+                <div class="absolute top-6 left-1/2 -translate-x-1/2 w-28 h-6 bg-black rounded-full z-20 flex items-center justify-center">
+                    <div class="w-3 h-3 rounded-full bg-slate-900/80 mr-2"></div>
+                    <div class="w-2 h-2 rounded-full bg-blue-900/60"></div>
+                </div>
+                <!-- Screen Iframe Container -->
+                <div class="w-full h-full rounded-[38px] overflow-hidden bg-white relative z-10">
+                    <iframe id="screen-frame" class="w-full h-full border-0" src="00_inscription_auth.html"></iframe>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function selectScreen(file, title) {
+            document.getElementById('screen-frame').src = file;
+            document.getElementById('current-title').textContent = title;
+            document.getElementById('open-tab').href = file;
+            document.querySelectorAll('aside button').forEach(b => {
+                b.classList.remove('bg-emerald-950', 'text-emerald-300', 'border-emerald-600/50');
+            });
+            event.currentTarget.classList.add('bg-emerald-950', 'text-emerald-300', 'border-emerald-600/50');
+        }
+        const firstBtn = document.getElementById('btn-1');
+        if (firstBtn) firstBtn.classList.add('bg-emerald-950', 'text-emerald-300', 'border-emerald-600/50');
+    </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "GERETOU",
+    "slug": "geretou",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.geretou.app",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "GERETOU utilise Face ID pour sécuriser l'accès à vos données financières."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0B4F3A"
+      },
+      "package": "com.geretou.app",
+      "permissions": [
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT",
+        "POST_NOTIFICATIONS"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Autoriser GERETOU à utiliser Face ID pour déverrouiller vos comptes."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#0B4F3A"
+        }
+      ],
+      "expo-sqlite",
+      "expo-secure-store"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "geretou-mobile-app"
+      }
+    }
+  }
+}
