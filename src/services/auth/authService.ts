@@ -6,13 +6,32 @@
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import * as LocalAuthentication from 'expo-local-authentication';
+import * as Crypto from 'expo-crypto';
+import {
+  hashPinSecure,
+  verifyPinSecure,
+  isSecureHash,
+  legacyHashPin,
+  constantTimeEqual,
+  parseLockout,
+  registerFailure,
+  remainingFreeAttempts,
+} from './pinSecurity';
+import { makeGuestEmail } from './identity';
 import { getDatabase, withTransaction } from '../db/database';
 import { User, Account } from '../../types/database';
 
 const MASTER_SALT_KEY = 'geretou_master_salt';
 const ACTIVE_USER_ID_KEY = 'geretou_active_user_id';
+const PIN_PEPPER_KEY = 'geretou_pin_pepper';
 const FAILED_ATTEMPTS_KEY = 'geretou_failed_pin_attempts';
-const MAX_ATTEMPTS = 5;
+
+export interface PinVerificationResult {
+  success: boolean;
+  remainingAttempts?: number;
+  /** Timestamp (ms) jusqu'auquel la saisie est bloquée, 0 si aucun blocage. */
+  lockedUntil?: number;
+}
 
 // Gestionnaire de stockage sécurisé avec compatibilité Web
 async function secureStorageGet(key: string): Promise<string | null> {
@@ -38,33 +57,71 @@ async function secureStorageDelete(key: string): Promise<void> {
   await SecureStore.deleteItemAsync(key);
 }
 
-// Fonction de hachage SHA-256 avec sel pour environnement mobile Expo
-async function hashPin(pin: string, salt: string): Promise<string> {
-  const message = `${salt}::${pin}::GERETOU_SECURE_V1`;
-  // Simple et robuste : hachage standard avec sel fort
-  let hash = 0;
-  for (let i = 0; i < message.length; i++) {
-    const char = message.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  // Dérivation supplémentaire pour renforcer l'entropie
-  const hexPart = Math.abs(hash).toString(16).padStart(8, '0');
-  const buffer = Array.from(message).map(c => c.charCodeAt(0).toString(16)).join('');
-  return `sha256_${hexPart}_${buffer.slice(0, 32)}`;
+function randomHex(byteCount: number): string {
+  return Array.from(Crypto.getRandomBytes(byteCount), (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 export class AuthService {
   /**
    * Récupère ou génère le sel maître stocké dans le SecureStore matériel (iOS Keychain / Android Keystore)
    */
-  private static async getMasterSalt(): Promise<string> {
-    let salt = await secureStorageGet(MASTER_SALT_KEY);
-    if (!salt) {
-      salt = `salt_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
-      await secureStorageSet(MASTER_SALT_KEY, salt);
+  private static async getLegacyMasterSalt(): Promise<string | null> {
+    return await secureStorageGet(MASTER_SALT_KEY);
+  }
+
+  /**
+   * Secret (« pepper ») conservé uniquement dans le SecureStore matériel.
+   * Sans lui, les empreintes stockées en base sont inexploitables.
+   */
+  private static async getPepper(): Promise<string> {
+    let pepper = await secureStorageGet(PIN_PEPPER_KEY);
+    if (!pepper) {
+      pepper = randomHex(32);
+      await secureStorageSet(PIN_PEPPER_KEY, pepper);
     }
-    return salt;
+    return pepper;
+  }
+
+  private static async createPinHash(pin: string): Promise<string> {
+    const pepper = await this.getPepper();
+    return hashPinSecure(pin, Crypto.getRandomBytes(16), pepper);
+  }
+
+  /**
+   * Rattache le compte Google au profil local (le profil invité devient un compte).
+   * L'e-mail Google sert ensuite à reconnaître la sauvegarde et à récupérer l'accès.
+   */
+  public static async linkGoogleAccount(email: string): Promise<User | null> {
+    const user = await this.getActiveUser();
+    if (!user) return null;
+    const normalized = email.trim().toLowerCase();
+    if (user.email !== normalized) {
+      const db = await getDatabase();
+      await db.runAsync('UPDATE users SET email = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?;', [normalized, user.id]);
+    }
+    return { ...user, email: normalized };
+  }
+
+  /** Empreinte d'un nouveau PIN pour cet appareil (restauration d'une sauvegarde). */
+  public static async hashNewPin(pin: string): Promise<string> {
+    return this.createPinHash(pin);
+  }
+
+  /**
+   * Finalise une restauration : désigne l'utilisateur restauré comme actif,
+   * applique le choix biométrique fait sur cet appareil et remet le compteur d'échecs à zéro.
+   */
+  public static async finalizeRestoredUser(enableBiometrics: boolean): Promise<User> {
+    const db = await getDatabase();
+    const user = await db.getFirstAsync<User>('SELECT * FROM users LIMIT 1;');
+    if (!user) throw new Error('La sauvegarde ne contient aucun utilisateur.');
+    await db.runAsync('UPDATE users SET biometric_enabled = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?;', [
+      enableBiometrics ? 1 : 0,
+      user.id,
+    ]);
+    await secureStorageSet(ACTIVE_USER_ID_KEY, user.id);
+    await secureStorageDelete(FAILED_ATTEMPTS_KEY);
+    return { ...user, biometric_enabled: enableBiometrics ? 1 : 0 };
   }
 
   /**
@@ -100,24 +157,29 @@ export class AuthService {
   /**
    * Enregistrement complet d'un nouvel utilisateur avec création de son portefeuille de départ
    */
+  /**
+   * @param email adresse Google si connue ; null = profil invité (aucun compte requis).
+   */
   public static async registerUser(
-    email: string,
+    email: string | null,
     pin: string,
     enableBiometrics: boolean = false,
     initialWaveBalance: number = 0,
-    initialCashBalance: number = 0
+    initialCashBalance: number = 0,
+    displayName: string | null = null
   ): Promise<User> {
     const db = await getDatabase();
-    const salt = await this.getMasterSalt();
-    const pinHash = await hashPin(pin, salt);
-    const userId = `usr_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const pinHash = await this.createPinHash(pin);
+    const uuid = Crypto.randomUUID();
+    const userId = `usr_${uuid}`;
+    const userEmail = email?.trim().toLowerCase() || makeGuestEmail(uuid);
 
     return await withTransaction(async (txDb) => {
       // 1. Insertion de l'utilisateur
       await txDb.runAsync(
-        `INSERT INTO users (id, email, pin_hash, biometric_enabled)
-         VALUES (?, ?, ?, ?);`,
-        [userId, email.trim().toLowerCase(), pinHash, enableBiometrics ? 1 : 0]
+        `INSERT INTO users (id, email, display_name, pin_hash, biometric_enabled)
+         VALUES (?, ?, ?, ?, ?);`,
+        [userId, userEmail, displayName?.trim() || null, pinHash, enableBiometrics ? 1 : 0]
       );
 
       // 2. Création des comptes de départ (Wave, Cash, MoMo)
@@ -154,32 +216,51 @@ export class AuthService {
   }
 
   /**
-   * Vérification du code PIN à la connexion
+   * État courant du blocage (pour afficher un compte à rebours sans saisir de PIN).
    */
-  public static async verifyPin(pin: string): Promise<{ success: boolean; remainingAttempts?: number }> {
+  public static async getLockoutStatus(): Promise<{ remainingAttempts: number; lockedUntil: number }> {
+    const state = parseLockout(await secureStorageGet(FAILED_ATTEMPTS_KEY));
+    return { remainingAttempts: remainingFreeAttempts(state), lockedUntil: state.lockedUntil };
+  }
+
+  /**
+   * Vérification du code PIN à la connexion.
+   * Blocage progressif (30 s, 1 min, 2 min… jusqu'à 1 h) au-delà de 5 échecs.
+   * Les anciens PIN (format « sha256_ ») sont migrés vers PBKDF2 au premier succès.
+   */
+  public static async verifyPin(pin: string): Promise<PinVerificationResult> {
     const user = await this.getActiveUser();
     if (!user) return { success: false };
 
-    // Vérifier les échecs récents
-    const attemptsStr = await secureStorageGet(FAILED_ATTEMPTS_KEY);
-    const failedAttempts = attemptsStr ? parseInt(attemptsStr, 10) : 0;
-
-    if (failedAttempts >= MAX_ATTEMPTS) {
-      return { success: false, remainingAttempts: 0 };
+    const now = Date.now();
+    const lockout = parseLockout(await secureStorageGet(FAILED_ATTEMPTS_KEY));
+    if (lockout.lockedUntil > now) {
+      return { success: false, remainingAttempts: 0, lockedUntil: lockout.lockedUntil };
     }
 
-    const salt = await this.getMasterSalt();
-    const calculatedHash = await hashPin(pin, salt);
+    let valid = false;
+    if (isSecureHash(user.pin_hash)) {
+      valid = await verifyPinSecure(pin, user.pin_hash, await this.getPepper());
+    } else {
+      const legacySalt = await this.getLegacyMasterSalt();
+      valid = legacySalt !== null && constantTimeEqual(legacyHashPin(pin, legacySalt), user.pin_hash);
+      if (valid) {
+        const db = await getDatabase();
+        await db.runAsync(
+          'UPDATE users SET pin_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?;',
+          [await this.createPinHash(pin), user.id]
+        );
+      }
+    }
 
-    if (calculatedHash === user.pin_hash) {
-      // Réinitialiser le compteur d'échecs
+    if (valid) {
       await secureStorageDelete(FAILED_ATTEMPTS_KEY);
       return { success: true };
-    } else {
-      const newCount = failedAttempts + 1;
-      await secureStorageSet(FAILED_ATTEMPTS_KEY, newCount.toString());
-      return { success: false, remainingAttempts: Math.max(0, MAX_ATTEMPTS - newCount) };
     }
+
+    const next = registerFailure(lockout, now);
+    await secureStorageSet(FAILED_ATTEMPTS_KEY, JSON.stringify(next));
+    return { success: false, remainingAttempts: remainingFreeAttempts(next), lockedUntil: next.lockedUntil };
   }
 
   /**
@@ -202,6 +283,32 @@ export class AuthService {
     }
 
     return { hasHardware, isEnrolled, biometryType };
+  }
+
+  /**
+   * Demande une vérification biométrique, sans condition sur l'utilisateur
+   * (utilisée à l'inscription pour vérifier que la biométrie fonctionne avant de l'activer).
+   */
+  public static async promptBiometrics(promptMessage: string): Promise<boolean> {
+    try {
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage,
+        cancelLabel: 'Utiliser le code PIN',
+        disableDeviceFallback: true,
+      });
+      return result.success;
+    } catch {
+      return false;
+    }
+  }
+
+  /** Annule une demande biométrique en cours (effectif sur Android, sans effet ailleurs). */
+  public static async cancelBiometrics(): Promise<void> {
+    try {
+      await LocalAuthentication.cancelAuthenticate();
+    } catch {
+      // Non supporté sur cette plateforme
+    }
   }
 
   /**

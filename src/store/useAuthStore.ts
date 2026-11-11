@@ -4,7 +4,7 @@
  */
 
 import { create } from 'zustand';
-import { AuthService } from '../services/auth/authService';
+import { AuthService, PinVerificationResult } from '../services/auth/authService';
 import { User } from '../types/database';
 
 interface AuthState {
@@ -15,19 +15,26 @@ interface AuthState {
   biometricAvailable: boolean;
   biometryType: string;
   remainingAttempts: number;
+  /** Timestamp (ms) de fin du blocage de saisie du PIN, 0 si aucun. */
+  lockedUntil: number;
   lastActiveTimestamp: number;
   isLoading: boolean;
 
   // Actions
   initAuth: () => Promise<void>;
   register: (
-    email: string,
+    email: string | null,
     pin: string,
     enableBiometrics: boolean,
     initialWave: number,
-    initialCash: number
+    initialCash: number,
+    displayName?: string
   ) => Promise<boolean>;
-  verifyPin: (pin: string) => Promise<boolean>;
+  verifyPin: (pin: string) => Promise<PinVerificationResult>;
+  /** Rattache le compte Google au profil local. */
+  linkGoogleAccount: (email: string) => Promise<void>;
+  /** Ouvre la session après une restauration réussie (le PIN vient d'être choisi). */
+  completeRestore: (enableBiometrics: boolean) => Promise<void>;
   unlockWithBiometrics: () => Promise<boolean>;
   lockSession: () => void;
   recordActivity: () => void;
@@ -44,6 +51,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   biometricAvailable: false,
   biometryType: 'Biométrie',
   remainingAttempts: 5,
+  lockedUntil: 0,
   lastActiveTimestamp: Date.now(),
   isLoading: true,
 
@@ -58,6 +66,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
 
       const bio = await AuthService.checkBiometricsAvailable();
+      const lockout = await AuthService.getLockoutStatus();
 
       set({
         hasUser,
@@ -66,6 +75,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isAuthenticated: false,
         biometricAvailable: bio.hasHardware && bio.isEnrolled,
         biometryType: bio.biometryType,
+        remainingAttempts: lockout.remainingAttempts,
+        lockedUntil: lockout.lockedUntil,
         isLoading: false,
         lastActiveTimestamp: Date.now(),
       });
@@ -75,7 +86,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  register: async (email, pin, enableBiometrics, initialWave, initialCash) => {
+  register: async (email, pin, enableBiometrics, initialWave, initialCash, displayName) => {
     try {
       set({ isLoading: true });
       const user = await AuthService.registerUser(
@@ -83,7 +94,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         pin,
         enableBiometrics,
         initialWave,
-        initialCash
+        initialCash,
+        displayName ?? null
       );
 
       set({
@@ -109,15 +121,34 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isLocked: false,
         isAuthenticated: true,
         remainingAttempts: 5,
+        lockedUntil: 0,
         lastActiveTimestamp: Date.now(),
       });
-      return true;
     } else {
       set({
         remainingAttempts: result.remainingAttempts ?? 0,
+        lockedUntil: result.lockedUntil ?? 0,
       });
-      return false;
     }
+    return result;
+  },
+
+  linkGoogleAccount: async (email) => {
+    const user = await AuthService.linkGoogleAccount(email);
+    if (user) set({ currentUser: user });
+  },
+
+  completeRestore: async (enableBiometrics) => {
+    const user = await AuthService.finalizeRestoredUser(enableBiometrics);
+    set({
+      hasUser: true,
+      currentUser: user,
+      isLocked: false,
+      isAuthenticated: true,
+      remainingAttempts: 5,
+      lockedUntil: 0,
+      lastActiveTimestamp: Date.now(),
+    });
   },
 
   unlockWithBiometrics: async () => {

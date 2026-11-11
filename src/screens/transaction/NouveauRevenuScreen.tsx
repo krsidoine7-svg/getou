@@ -1,29 +1,33 @@
 /**
- * Écran Saisie Rapide d'un Revenu (NouveauRevenuScreen) — GERETOU
- * Intègre la Règle Comptable Stricte : Crédit/Emprunt routé vers Dettes passives.
+ * Nouveau Revenu / Gain — GERETOU
+ * Maquette Stitch « Nouveau Revenu / Gain ».
+ * Règle comptable : un crédit / emprunt est enregistré comme dette, pas comme revenu.
  */
 
-import React, { useState, useEffect } from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
-import { HeroAmountKeypad } from '../../components/transaction/HeroAmountKeypad';
+import React, { useEffect, useState } from 'react';
+import { SafeAreaView, ScrollView, View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
+import { X, TriangleAlert, Check, NotebookPen, CircleX, CircleCheck, Info, ArrowDown } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
+import { AmountCard } from '../../components/transaction/AmountCard';
 import { AccountSelector } from '../../components/transaction/AccountSelector';
-import { Input } from '../../components/common/Input';
-import { Button } from '../../components/common/Button';
-import { Card } from '../../components/common/Card';
-import { Badge } from '../../components/common/Badge';
+import { PROVENANCE_ICONS } from '../../components/common/AppIcons';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useWalletStore } from '../../store/useWalletStore';
 import { useTransactionStore } from '../../store/useTransactionStore';
+import { showToast } from '../../store/useToastStore';
 import { IncomeProvenance } from '../../types/database';
 import { colors, radii, spacing, typography, formatFCFA } from '../../theme/tokens';
+
+const PRESETS = [10000, 50000, 100000, 200000];
+
+const PROVENANCES: { id: IncomeProvenance; title: string; subtitle: string; isDebt?: boolean }[] = [
+  { id: 'SALARY', title: 'Salaire', subtitle: 'Revenu fixe récurrent' },
+  { id: 'FREELANCE', title: 'Prestation / Freelance', subtitle: 'Facture client' },
+  { id: 'SALE', title: 'Vente d’un bien', subtitle: 'Commerce, objet' },
+  { id: 'GIFT', title: 'Don / Cadeau', subtitle: 'Soutien famille' },
+  { id: 'LOAN', title: 'Crédit / Emprunt', subtitle: 'Enregistré en dette', isDebt: true },
+  { id: 'OTHER', title: 'Autre provenance', subtitle: 'Entrée ponctuelle' },
+];
 
 interface NouveauRevenuScreenProps {
   onClose: () => void;
@@ -31,59 +35,31 @@ interface NouveauRevenuScreenProps {
   onSuccess: () => void;
 }
 
-interface ProvenanceOption {
-  id: IncomeProvenance;
-  title: string;
-  subtitle: string;
-  emoji: string;
-  isDebt?: boolean;
-}
-
-const PROVENANCES: ProvenanceOption[] = [
-  { id: 'SALARY', title: 'Salaire', subtitle: 'Revenu fixe récurrent', emoji: '💼' },
-  { id: 'FREELANCE', title: 'Prestation / Freelance', subtitle: 'Facture client', emoji: '💻' },
-  { id: 'SALE', title: 'Vente d’un bien', subtitle: 'Commerce, objet', emoji: '🛍️' },
-  { id: 'GIFT', title: 'Don / Cadeau', subtitle: 'Soutien famille', emoji: '🎁' },
-  { id: 'LOAN', title: 'Crédit / Emprunt', subtitle: 'Routé vers Dettes', emoji: '🤝', isDebt: true },
-  { id: 'OTHER', title: 'Autre provenance', subtitle: 'Entrée ponctuelle', emoji: '⚡' },
-];
-
-export const NouveauRevenuScreen: React.FC<NouveauRevenuScreenProps> = ({
-  onClose,
-  onSwitchToExpense,
-  onSuccess,
-}) => {
-  const { currentUser } = useAuthStore();
+export const NouveauRevenuScreen: React.FC<NouveauRevenuScreenProps> = ({ onClose, onSwitchToExpense, onSuccess }) => {
+  const { currentUser, recordActivity } = useAuthStore();
   const { summary, fetchWallet } = useWalletStore();
   const { createIncome, isLoading } = useTransactionStore();
 
-  const [amount, setAmount] = useState<number>(0);
-  const [selectedAccountId, setSelectedAccountId] = useState<string>(
-    summary.accounts[0]?.id || ''
-  );
+  const accounts = summary.accounts.filter((a) => a.is_archived === 0);
+  const [amount, setAmount] = useState(0);
+  const [selectedAccountId, setSelectedAccountId] = useState(accounts[0]?.id ?? '');
   const [provenance, setProvenance] = useState<IncomeProvenance>('SALARY');
-  const [notes, setNotes] = useState<string>('');
+  const [notes, setNotes] = useState('');
+  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!selectedAccountId && summary.accounts.length > 0) {
-      setSelectedAccountId(summary.accounts[0].id);
-    }
+    if (!selectedAccountId && accounts.length > 0) setSelectedAccountId(accounts[0].id);
   }, [summary.accounts]);
 
-  const isLoanSelected = provenance === 'LOAN';
+  useEffect(() => setFormError(null), [amount, selectedAccountId, provenance]);
 
-  const handleSubmit = async () => {
+  const isLoan = provenance === 'LOAN';
+
+  const submit = async () => {
     if (!currentUser) return;
-
-    if (amount <= 0) {
-      Alert.alert('Montant Invalide', 'Veuillez saisir un montant supérieur à 0 FCFA.');
-      return;
-    }
-
-    if (!selectedAccountId) {
-      Alert.alert('Compte Invalide', 'Veuillez choisir un portefeuille de destination.');
-      return;
-    }
+    recordActivity();
+    if (amount <= 0) return setFormError('Saisissez un montant supérieur à 0 FCFA.');
+    if (!selectedAccountId) return setFormError('Choisissez le compte qui reçoit cet argent.');
 
     const result = await createIncome({
       userId: currentUser.id,
@@ -92,312 +68,259 @@ export const NouveauRevenuScreen: React.FC<NouveauRevenuScreenProps> = ({
       provenance,
       notes: notes.trim() || undefined,
     });
+    if (!result) return setFormError("Impossible d'enregistrer le revenu. Réessayez.");
 
-    if (result) {
-      await fetchWallet(currentUser.id);
-      if (result.isDebtCreated) {
-        Alert.alert(
-          'Crédit Comptabilisé en Dette',
-          `+${formatFCFA(amount)} ont été ajoutés sur votre compte. Conformément à la règle comptable stricte de GERETOU, cette somme a été enregistrée dans vos Dettes à rembourser et n'augmente pas votre revenu net.`,
-          [{ text: 'Compris', onPress: () => { onSuccess(); onClose(); } }]
-        );
-      } else {
-        Alert.alert(
-          'Revenu Enregistré',
-          `+${formatFCFA(amount)} crédités sur votre compte avec succès.`,
-          [{ text: 'OK', onPress: () => { onSuccess(); onClose(); } }]
-        );
-      }
+    await fetchWallet(currentUser.id);
+    if (result.isDebtCreated) {
+      showToast(
+        {
+          kind: 'info',
+          title: 'Emprunt enregistré comme dette',
+          message: `+${formatFCFA(amount)} ajoutés à votre compte, et inscrits dans vos dettes à rembourser (pas dans vos revenus).`,
+        },
+        6000
+      );
     } else {
-      Alert.alert('Erreur', "Impossible d'enregistrer le revenu.");
+      showToast({ kind: 'success', title: 'Revenu enregistré', message: `+${formatFCFA(amount)} crédités sur votre compte.` });
     }
+    onSuccess();
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Header Sticky */}
       <View style={styles.topBar}>
-        <TouchableOpacity activeOpacity={0.7} onPress={onClose} style={styles.closeBtn}>
-          <Text style={styles.closeText}>✕</Text>
-        </TouchableOpacity>
-
-        <View style={styles.segmentContainer}>
-          <TouchableOpacity activeOpacity={0.7} onPress={onSwitchToExpense} style={styles.segmentPill}>
-            <Text style={styles.segmentTextInactive}>Dépense</Text>
-          </TouchableOpacity>
-          <View style={[styles.segmentPill, styles.segmentPillActive]}>
+        <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel="Fermer" style={styles.closeBtn}>
+          <X size={22} color={colors.text.primary} />
+        </Pressable>
+        <View style={styles.segment} accessibilityRole="tablist">
+          <Pressable onPress={onSwitchToExpense} accessibilityRole="tab" accessibilityState={{ selected: false }} style={styles.segmentItem}>
+            <Text style={styles.segmentText}>Dépense</Text>
+          </Pressable>
+          <View style={[styles.segmentItem, styles.segmentActive]} accessibilityRole="tab" accessibilityState={{ selected: true }}>
+            <ArrowDown size={14} color={colors.text.inverted} />
             <Text style={styles.segmentTextActive}>Revenu</Text>
           </View>
         </View>
-
-        <View style={{ width: 36 }} />
+        <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-        <View style={styles.titleSection}>
-          <Text style={styles.screenTitle}>Nouveau Revenu / Gain</Text>
-          <Text style={styles.screenSubtitle}>Règle comptable stricte : emprunts imputés en passif</Text>
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" onTouchStart={recordActivity}>
+        <View>
+          <Text style={styles.title}>Nouveau revenu / gain</Text>
+          <Text style={styles.subtitle}>Saisie rapide d'une entrée d'argent</Text>
         </View>
 
-        {/* 1. Clavier Héro & Montant */}
-        <HeroAmountKeypad
-          amount={amount}
-          onAmountChange={setAmount}
-          type="INCOME"
-        />
+        <AmountCard label="Montant encaissé" amount={amount} onChange={setAmount} presets={PRESETS} tone="income" />
 
-        {/* 2. Provenance de l'argent */}
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Provenance de l'argent *</Text>
-          <View style={styles.provenanceGrid}>
+        <View>
+          <Text style={styles.sectionLabel}>Origine & motif</Text>
+          <View style={styles.noteField}>
+            <NotebookPen size={18} color={colors.text.secondary} />
+            <TextInput
+              value={notes}
+              onChangeText={setNotes}
+              placeholder="ex : salaire de mai, vente de pagnes…"
+              placeholderTextColor={colors.text.muted}
+              maxLength={120}
+              accessibilityLabel="Motif du revenu"
+              style={styles.noteInput}
+            />
+            {notes ? (
+              <Pressable onPress={() => setNotes('')} hitSlop={8} accessibilityRole="button" accessibilityLabel="Effacer le motif">
+                <CircleX size={18} color={colors.text.muted} />
+              </Pressable>
+            ) : null}
+          </View>
+        </View>
+
+        <View>
+          <Text style={styles.sectionLabel}>
+            Provenance de l'argent <Text style={{ color: colors.accent.danger }}>*</Text>
+          </Text>
+          <View style={styles.grid} accessibilityRole="radiogroup">
             {PROVENANCES.map((opt) => {
-              const isSelected = opt.id === provenance;
+              const on = opt.id === provenance;
+              const Icon = PROVENANCE_ICONS[opt.id];
               return (
-                <TouchableOpacity
+                <Pressable
                   key={opt.id}
-                  activeOpacity={0.8}
-                  onPress={() => setProvenance(opt.id)}
-                  style={[
-                    styles.provTile,
-                    isSelected ? styles.provTileSelected : undefined,
-                    opt.isDebt ? styles.provTileDebt : undefined,
-                  ]}
+                  onPress={() => {
+                    Haptics.selectionAsync().catch(() => {});
+                    setProvenance(opt.id);
+                  }}
+                  accessibilityRole="radio"
+                  accessibilityState={{ checked: on }}
+                  accessibilityLabel={opt.title}
+                  style={[styles.tile, on && (opt.isDebt ? styles.tileDebt : styles.tileOn), opt.id === 'OTHER' && !on && styles.tileDashed]}
                 >
-                  <View style={styles.provTileHeader}>
-                    <Text style={styles.provEmoji}>{opt.emoji}</Text>
-                    {opt.isDebt ? (
-                      <Badge label="Dette" variant="warning" />
-                    ) : isSelected ? (
-                      <View style={styles.checkBadge}>
-                        <Text style={styles.checkText}>✓</Text>
+                  <View style={styles.tileHead}>
+                    <View style={[styles.tileIcon, on && { backgroundColor: opt.isDebt ? colors.accent.warningBg : colors.primary.container }]}>
+                      <Icon size={20} color={on ? (opt.isDebt ? '#B45309' : colors.primary.DEFAULT) : colors.text.secondary} />
+                    </View>
+                    {on ? (
+                      <View style={[styles.check, opt.isDebt && { backgroundColor: colors.accent.warning }]}>
+                        <Check size={12} color={colors.text.inverted} strokeWidth={3} />
                       </View>
                     ) : null}
                   </View>
-                  <Text style={[styles.provTitle, isSelected ? styles.provTitleSelected : undefined]}>
+                  <Text style={[styles.tileTitle, on && { color: opt.isDebt ? '#B45309' : colors.primary.DEFAULT }]} numberOfLines={1}>
                     {opt.title}
                   </Text>
-                  <Text style={styles.provSubtitle}>{opt.subtitle}</Text>
-                </TouchableOpacity>
+                  <Text style={styles.tileSub} numberOfLines={1}>{opt.subtitle}</Text>
+                </Pressable>
               );
             })}
           </View>
         </View>
 
-        {/* Alerte Règle Comptable Stricte si Emprunt */}
-        {isLoanSelected ? (
-          <Card style={styles.loanWarningCard}>
-            <View style={styles.warningHeader}>
-              <Text style={styles.warningTitle}>⚠️ Règle Comptable Stricte GERETOU</Text>
-              <Badge label="Non-Revenu" variant="warning" />
-            </View>
-            <Text style={styles.warningText}>
-              Un crédit ou emprunt n'est pas un revenu d'activité ! Cette somme augmentera votre solde liquide
-              mais sera simultanément enregistrée comme une **Dette à rembourser** pour ne pas fausser vos bilans.
+        {isLoan ? (
+          <View style={[styles.note, styles.noteWarn]}>
+            <TriangleAlert size={18} color="#B45309" />
+            <Text style={styles.noteText}>
+              <Text style={styles.noteStrong}>Un emprunt n'est pas un revenu.</Text> Cette somme augmente votre solde, mais elle est
+              aussi inscrite comme <Text style={styles.noteStrong}>dette à rembourser</Text> pour ne pas fausser vos bilans.
             </Text>
-          </Card>
-        ) : null}
+          </View>
+        ) : (
+          <View style={styles.note}>
+            <Info size={18} color={colors.primary.DEFAULT} />
+            <Text style={styles.noteText}>
+              <Text style={styles.noteStrong}>Note comptable :</Text> ce montant est compté dans vos revenus et augmente votre solde
+              disponible.
+            </Text>
+          </View>
+        )}
 
-        {/* 3. Sélecteur de Portefeuille Destinataire */}
         <AccountSelector
-          accounts={summary.accounts.filter((a) => a.is_archived === 0)}
+          accounts={accounts}
           selectedAccountId={selectedAccountId}
           onSelectAccount={setSelectedAccountId}
-          label="Créditer sur le compte :"
-        />
-
-        {/* 4. Motif / Description */}
-        <Input
-          label="Motif ou source"
-          value={notes}
-          onChangeText={setNotes}
-          placeholder="ex: Virement Entreprise, Vente vélo..."
+          label="Compte de destination"
         />
       </ScrollView>
 
-      {/* Footer Sticky */}
-      <View style={styles.footerSticky}>
-        <Button
-          title={amount > 0 ? `Enregistrer le revenu (+${formatFCFA(amount)})` : 'Enregistrer le revenu'}
-          onPress={handleSubmit}
-          loading={isLoading}
-          disabled={amount <= 0}
-          variant="primary"
-          style={styles.submitBtn}
-        />
+      <View style={styles.footer}>
+        {formError ? (
+          <View style={styles.formError} accessibilityRole="alert">
+            <TriangleAlert size={16} color={colors.accent.danger} />
+            <Text style={styles.formErrorText}>{formError}</Text>
+          </View>
+        ) : null}
+        <Pressable
+          onPress={submit}
+          disabled={amount <= 0 || isLoading}
+          accessibilityRole="button"
+          style={({ pressed }) => [styles.cta, (amount <= 0 || isLoading) && styles.ctaDisabled, pressed && styles.ctaPressed]}
+        >
+          {isLoading ? <ActivityIndicator color={colors.text.inverted} /> : <CircleCheck size={20} color={colors.text.inverted} />}
+          <Text style={styles.ctaText}>{amount > 0 ? `Enregistrer le revenu (+${formatFCFA(amount)})` : 'Enregistrer le revenu'}</Text>
+        </Pressable>
+        <View style={styles.footNote}>
+          <CircleCheck size={13} color={colors.text.secondary} />
+          <Text style={styles.footNoteText}>Enregistrement local immédiat, même sans connexion</Text>
+        </View>
       </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.surface.canvas,
-  },
+  safeArea: { flex: 1, backgroundColor: colors.surface.canvas },
   topBar: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: spacing.base,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.surface.card,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.surface.border,
-  },
-  closeBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.surface.muted,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  closeText: {
-    fontSize: 16,
-    color: colors.text.primary,
-    fontWeight: typography.weights.bold,
-  },
-  segmentContainer: {
-    flexDirection: 'row',
-    backgroundColor: colors.surface.muted,
-    borderRadius: radii.full,
-    padding: 3,
-  },
-  segmentPill: {
-    paddingHorizontal: spacing.base,
-    paddingVertical: 6,
-    borderRadius: radii.full,
-  },
-  segmentPillActive: {
-    backgroundColor: colors.primary.DEFAULT,
-  },
-  segmentTextActive: {
-    fontSize: typography.sizes.bodySm,
-    fontWeight: typography.weights.bold,
-    color: colors.text.inverted,
-  },
-  segmentTextInactive: {
-    fontSize: typography.sizes.bodySm,
-    fontWeight: typography.weights.medium,
-    color: colors.text.secondary,
-  },
-  scrollContainer: {
-    padding: spacing.screenPadding,
-    paddingBottom: 90,
-  },
-  titleSection: {
-    marginBottom: spacing.md,
-  },
-  screenTitle: {
-    fontSize: typography.sizes.title,
-    fontWeight: typography.weights.extrabold,
-    color: colors.primary.DEFAULT,
-  },
-  screenSubtitle: {
-    fontSize: typography.sizes.caption,
-    color: colors.text.secondary,
-    marginTop: 2,
-  },
-  section: {
-    marginBottom: spacing.base,
-  },
-  sectionLabel: {
-    fontSize: typography.sizes.bodySm,
-    fontWeight: typography.weights.bold,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  provenanceGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
+    paddingHorizontal: spacing.base,
+    paddingVertical: spacing.md,
   },
-  provTile: {
-    width: '48.5%',
+  closeBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface.card },
+  segment: { flexDirection: 'row', backgroundColor: colors.brands.waveBg, borderRadius: radii.lg, padding: 4 },
+  segmentItem: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: spacing.lg, paddingVertical: spacing.sm, borderRadius: radii.md },
+  segmentActive: { backgroundColor: colors.primary.DEFAULT },
+  segmentText: { fontSize: typography.sizes.body, color: colors.text.secondary, fontWeight: typography.weights.medium },
+  segmentTextActive: { fontSize: typography.sizes.body, color: colors.text.inverted, fontWeight: typography.weights.bold },
+  content: { paddingHorizontal: spacing.base, paddingBottom: 160, gap: spacing.lg },
+  title: { fontSize: typography.sizes.headline, fontWeight: typography.weights.extrabold, color: colors.primary.dark },
+  subtitle: { fontSize: typography.sizes.bodySm, color: colors.text.secondary, marginTop: 2 },
+  sectionLabel: { fontSize: typography.sizes.body, fontWeight: typography.weights.semibold, color: colors.text.primary, marginBottom: spacing.sm },
+  noteField: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
     backgroundColor: colors.surface.card,
-    borderRadius: radii.md,
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    borderColor: colors.surface.border,
+    paddingHorizontal: spacing.md,
+    minHeight: 52,
+  },
+  noteInput: { flex: 1, fontSize: typography.sizes.body, color: colors.text.primary, paddingVertical: spacing.sm, outlineStyle: 'none' } as never,
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  tile: {
+    flexBasis: '48%',
+    flexGrow: 1,
+    backgroundColor: colors.surface.card,
+    borderRadius: radii.lg,
     borderWidth: 1,
     borderColor: colors.surface.border,
     padding: spacing.md,
-    marginBottom: spacing.sm,
   },
-  provTileSelected: {
-    borderColor: colors.primary.DEFAULT,
-    borderWidth: 2,
-    backgroundColor: colors.primary.subtle,
-  },
-  provTileDebt: {
-    borderColor: colors.accent.warningBorder,
-  },
-  provTileHeader: {
+  tileOn: { borderWidth: 2, borderColor: colors.primary.DEFAULT, backgroundColor: colors.primary.subtle },
+  tileDebt: { borderWidth: 2, borderColor: colors.accent.warning, backgroundColor: colors.accent.warningBg },
+  tileDashed: { borderStyle: 'dashed', borderWidth: 1.5 },
+  tileHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: spacing.sm },
+  tileIcon: { width: 40, height: 40, borderRadius: radii.md, backgroundColor: colors.brands.waveBg, alignItems: 'center', justifyContent: 'center' },
+  check: { width: 22, height: 22, borderRadius: 11, backgroundColor: colors.primary.DEFAULT, alignItems: 'center', justifyContent: 'center' },
+  tileTitle: { fontSize: typography.sizes.body, fontWeight: typography.weights.bold, color: colors.text.primary },
+  tileSub: { fontSize: typography.sizes.caption, color: colors.text.secondary, marginTop: 2 },
+  note: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    backgroundColor: colors.brands.waveBg,
+    borderRadius: radii.lg,
+    padding: spacing.md,
   },
-  provEmoji: {
-    fontSize: 20,
-  },
-  checkBadge: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: colors.primary.DEFAULT,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkText: {
-    color: colors.text.inverted,
-    fontSize: 10,
-    fontWeight: typography.weights.bold,
-  },
-  provTitle: {
-    fontSize: typography.sizes.bodySm,
-    fontWeight: typography.weights.bold,
-    color: colors.text.primary,
-    marginBottom: 2,
-  },
-  provTitleSelected: {
-    color: colors.primary.DEFAULT,
-  },
-  provSubtitle: {
-    fontSize: 11,
-    color: colors.text.secondary,
-  },
-  loanWarningCard: {
-    backgroundColor: colors.accent.warningBg,
-    borderColor: colors.accent.warningBorder,
-    marginBottom: spacing.base,
-  },
-  warningHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
-  },
-  warningTitle: {
-    fontSize: typography.sizes.bodySm,
-    fontWeight: typography.weights.bold,
-    color: colors.accent.warning,
-  },
-  warningText: {
-    fontSize: typography.sizes.caption,
-    color: colors.accent.warning,
-    lineHeight: 18,
-    fontWeight: typography.weights.medium,
-  },
-  footerSticky: {
+  noteWarn: { backgroundColor: colors.accent.warningBg, borderWidth: 1, borderColor: colors.accent.warningBorder },
+  noteText: { flex: 1, fontSize: typography.sizes.bodySm, lineHeight: 19, color: colors.text.secondary },
+  noteStrong: { fontWeight: typography.weights.bold, color: colors.text.primary },
+  footer: {
     position: 'absolute',
-    bottom: 0,
     left: 0,
     right: 0,
+    bottom: 0,
     backgroundColor: colors.surface.card,
-    paddingHorizontal: spacing.base,
-    paddingVertical: spacing.md,
     borderTopWidth: 1,
     borderTopColor: colors.surface.border,
+    paddingHorizontal: spacing.base,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
   },
-  submitBtn: {
-    width: '100%',
+  formError: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.accent.dangerBg,
+    borderColor: colors.accent.dangerBorder,
+    borderWidth: 1,
+    borderRadius: radii.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginBottom: spacing.sm,
   },
+  formErrorText: { flex: 1, color: colors.accent.danger, fontSize: typography.sizes.bodySm, fontWeight: typography.weights.semibold },
+  cta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    minHeight: 56,
+    borderRadius: radii.lg,
+    backgroundColor: colors.primary.DEFAULT,
+  },
+  ctaDisabled: { backgroundColor: colors.text.muted },
+  ctaPressed: { backgroundColor: colors.primary.dark },
+  ctaText: { color: colors.text.inverted, fontSize: typography.sizes.subtitle, fontWeight: typography.weights.bold },
+  footNote: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: spacing.sm },
+  footNoteText: { fontSize: typography.sizes.caption, color: colors.text.secondary },
 });

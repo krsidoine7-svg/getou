@@ -1,18 +1,15 @@
 /**
- * Sélecteur de Portefeuille Source / Destination — Forest Ledger
- * Permet de choisir le compte débité avec affichage du solde en direct.
+ * Choix du compte (source ou destination) — GERETOU
+ * Maquettes Stitch « Nouvelle Dépense » / « Nouveau Revenu » : cartes défilantes
+ * avec pastille d'opérateur, nom, solde et coche.
  */
 
 import React from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Check } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Account } from '../../types/database';
+import { ACCOUNT_BRAND } from '../../theme/brand';
 import { colors, radii, spacing, typography, formatFCFA } from '../../theme/tokens';
 
 interface AccountSelectorProps {
@@ -26,77 +23,49 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
   accounts,
   selectedAccountId,
   onSelectAccount,
-  label = 'Portefeuille débité',
+  label = 'Compte source',
 }) => {
-  const getBadgeColor = (type: string) => {
-    switch (type) {
-      case 'WAVE':
-        return colors.brands.wave;
-      case 'MOMO':
-        return colors.brands.momo;
-      case 'ORANGE':
-        return colors.brands.orange;
-      default:
-        return colors.brands.cash;
-    }
-  };
-
-  const handleSelect = (id: string) => {
-    try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    } catch {
-      // Ignorer
-    }
+  const select = (id: string) => {
+    Haptics.selectionAsync().catch(() => {});
     onSelectAccount(id);
   };
 
   return (
-    <View style={styles.container}>
+    <View>
       <View style={styles.labelRow}>
         <Text style={styles.label}>{label}</Text>
-        <Text style={styles.countText}>{accounts.length} comptes</Text>
+        <Text style={styles.count}>
+          {accounts.length} compte{accounts.length > 1 ? 's' : ''} dispo
+        </Text>
       </View>
-
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {accounts.map((acc) => {
-          const isSelected = acc.id === selectedAccountId;
+          const selected = acc.id === selectedAccountId;
+          const brand = ACCOUNT_BRAND[acc.type];
           return (
-            <TouchableOpacity
+            <Pressable
               key={acc.id}
-              activeOpacity={0.8}
-              onPress={() => handleSelect(acc.id)}
-              style={[
-                styles.card,
-                isSelected ? styles.cardSelected : undefined,
-              ]}
+              onPress={() => select(acc.id)}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: selected }}
+              accessibilityLabel={`${acc.name}, ${formatFCFA(acc.balance)}`}
+              style={[styles.card, selected && styles.cardSelected]}
             >
-              <View style={styles.cardHeader}>
-                <View
-                  style={[
-                    styles.typeDot,
-                    { backgroundColor: getBadgeColor(acc.type) },
-                  ]}
-                />
-                {isSelected ? (
-                  <View style={styles.checkCircle}>
-                    <Text style={styles.checkIcon}>✓</Text>
+              <View style={styles.cardHead}>
+                <View style={[styles.pill, { backgroundColor: brand.bg }]}>
+                  <Text style={[styles.pillText, { color: brand.fg }]}>{brand.short}</Text>
+                </View>
+                {selected ? (
+                  <View style={styles.check}>
+                    <Check size={12} color={colors.text.inverted} strokeWidth={3} />
                   </View>
                 ) : (
-                  <View style={styles.emptyCircle} />
+                  <View style={styles.radio} />
                 )}
               </View>
-
-              <Text style={styles.accountName} numberOfLines={1}>
-                {acc.name}
-              </Text>
-              <Text style={styles.accountBalance}>
-                {formatFCFA(acc.balance)}
-              </Text>
-            </TouchableOpacity>
+              <Text style={styles.name} numberOfLines={1}>{acc.name}</Text>
+              <Text style={[styles.balance, acc.balance < 0 && { color: colors.accent.danger }]}>{formatFCFA(acc.balance)}</Text>
+            </Pressable>
           );
         })}
       </ScrollView>
@@ -105,86 +74,24 @@ export const AccountSelector: React.FC<AccountSelectorProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: spacing.base,
-  },
-  labelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
-  },
-  label: {
-    fontSize: typography.sizes.bodySm,
-    fontWeight: typography.weights.bold,
-    color: colors.text.primary,
-  },
-  countText: {
-    fontSize: typography.sizes.caption,
-    color: colors.text.muted,
-  },
-  scrollContent: {
-    paddingVertical: spacing.xs,
-  },
+  labelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm },
+  label: { fontSize: typography.sizes.bodySm, fontWeight: typography.weights.semibold, letterSpacing: 1, color: colors.text.secondary, textTransform: 'uppercase' },
+  count: { fontSize: typography.sizes.caption, color: colors.primary.DEFAULT, fontWeight: typography.weights.medium },
+  row: { gap: spacing.sm, paddingRight: spacing.base },
   card: {
-    width: 140,
+    width: 168,
     backgroundColor: colors.surface.card,
-    borderRadius: radii.md,
+    borderRadius: radii.lg,
     borderWidth: 1,
     borderColor: colors.surface.border,
     padding: spacing.md,
-    marginRight: spacing.sm,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 2,
-    elevation: 1,
   },
-  cardSelected: {
-    borderColor: colors.primary.DEFAULT,
-    borderWidth: 2,
-    backgroundColor: colors.primary.subtle,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
-  typeDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  checkCircle: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: colors.primary.DEFAULT,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkIcon: {
-    color: colors.text.inverted,
-    fontSize: 11,
-    fontWeight: typography.weights.bold,
-  },
-  emptyCircle: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    borderWidth: 1,
-    borderColor: colors.surface.border,
-  },
-  accountName: {
-    fontSize: typography.sizes.bodySm,
-    fontWeight: typography.weights.bold,
-    color: colors.text.primary,
-    marginBottom: 2,
-  },
-  accountBalance: {
-    fontSize: typography.sizes.caption,
-    fontWeight: typography.weights.bold,
-    color: colors.primary.DEFAULT,
-  },
+  cardSelected: { borderWidth: 2, borderColor: colors.primary.DEFAULT },
+  cardHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  pill: { paddingHorizontal: spacing.sm, paddingVertical: 2, borderRadius: radii.sm },
+  pillText: { fontSize: typography.sizes.caption, fontWeight: typography.weights.bold },
+  check: { width: 20, height: 20, borderRadius: 10, backgroundColor: colors.primary.DEFAULT, alignItems: 'center', justifyContent: 'center' },
+  radio: { width: 20, height: 20, borderRadius: 10, borderWidth: 1.5, borderColor: colors.surface.border },
+  name: { marginTop: spacing.sm, fontSize: typography.sizes.body, fontWeight: typography.weights.semibold, color: colors.text.primary },
+  balance: { marginTop: 2, fontSize: typography.sizes.bodySm, color: colors.text.secondary },
 });

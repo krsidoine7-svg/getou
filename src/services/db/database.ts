@@ -37,20 +37,26 @@ export async function initDatabase(): Promise<void> {
 
   // Exécution du schéma des 12 tables
   await db.execAsync(SCHEMA_SQL);
+  await runMigrations(db);
 
-  // Vérification et insertion des catégories par défaut
-  const existingCategories = await db.getAllAsync<{ count: number }>(
-    'SELECT COUNT(*) as count FROM categories;'
-  );
+  // Catégories par défaut : ajoute celles qui manquent (nouvelles versions de l'app incluses)
+  for (const cat of INITIAL_CATEGORIES) {
+    await db.runAsync(
+      `INSERT OR IGNORE INTO categories (id, name, icon, color, type, is_default)
+       VALUES (?, ?, ?, ?, ?, ?);`,
+      [cat.id, cat.name, cat.icon, cat.color, cat.type, cat.is_default]
+    );
+  }
+}
 
-  if (existingCategories && existingCategories[0]?.count === 0) {
-    for (const cat of INITIAL_CATEGORIES) {
-      await db.runAsync(
-        `INSERT INTO categories (id, name, icon, color, type, is_default)
-         VALUES (?, ?, ?, ?, ?, ?);`,
-        [cat.id, cat.name, cat.icon, cat.color, cat.type, cat.is_default]
-      );
-    }
+/**
+ * Migrations additives pour les bases créées avec une version antérieure du schéma.
+ * Chaque migration vérifie d'abord si elle est nécessaire (idempotente).
+ */
+async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
+  const userColumns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(users);');
+  if (!userColumns.some((c) => c.name === 'display_name')) {
+    await db.execAsync('ALTER TABLE users ADD COLUMN display_name TEXT;');
   }
 }
 

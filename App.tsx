@@ -4,48 +4,97 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  StatusBar,
-  View,
-  Text,
-  ActivityIndicator,
-  StyleSheet,
-  AppState,
-  AppStateStatus,
-} from 'react-native';
+import { StatusBar, View, StyleSheet, AppState, AppStateStatus } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
 import { initDatabase } from './src/services/db/database';
 import { useAuthStore } from './src/store/useAuthStore';
-import { RegisterScreen } from './src/screens/auth/RegisterScreen';
+import { useNavStore, isTabScreen, ScreenName, TabScreen } from './src/store/useNavStore';
+import { TabBar } from './src/components/navigation/TabBar';
+import { MoreScreen, MODULES } from './src/screens/more/MoreScreen';
+import { UpcomingScreen } from './src/screens/more/UpcomingScreen';
+import { BackupScreen } from './src/screens/settings/BackupScreen';
+import { WalletsScreen } from './src/screens/wallets/WalletsScreen';
+import { BudgetsScreen } from './src/screens/budgets/BudgetsScreen';
+import { ToastHost } from './src/components/common/ToastHost';
+import { SplashScreen } from './src/screens/onboarding/SplashScreen';
+import { OnboardingScreen } from './src/screens/onboarding/OnboardingScreen';
+import { isOnboardingDone, markOnboardingDone } from './src/services/storage/prefs';
+import { RegistrationFlow } from './src/screens/auth/RegistrationFlow';
+import { LoginFlow } from './src/screens/auth/LoginFlow';
 import { LockScreen } from './src/screens/auth/LockScreen';
 import { DashboardScreen } from './src/screens/dashboard/DashboardScreen';
 import { NouvelleDepenseScreen } from './src/screens/transaction/NouvelleDepenseScreen';
 import { NouveauRevenuScreen } from './src/screens/transaction/NouveauRevenuScreen';
-import { colors, typography, spacing } from './src/theme/tokens';
+import { colors } from './src/theme/tokens';
 
-type ActiveView = 'DASHBOARD' | 'NEW_EXPENSE' | 'NEW_INCOME';
+// Web : la fenêtre de connexion Google revient sur l'app ; ceci la referme et transmet le résultat.
+// Dans cette fenêtre, l'app ne doit rien démarrer (la base est déjà ouverte par l'onglet principal).
+const IS_AUTH_POPUP = WebBrowser.maybeCompleteAuthSession().type === 'success';
+
+/** Durée minimale d'affichage du splash, pour éviter un simple flash à l'écran. */
+const MIN_SPLASH_MS = 900;
+
+/** Écrans pas encore intégrés → étape du plan qui les livrera (doc/PLAN_ECRANS_STITCH.md). */
+const UPCOMING: Partial<Record<ScreenName, { title: string; planStep: string }>> = {
+  STOCKS: { title: 'Stocks & Courses', planStep: 'Étape 10' },
+  AGENDA: { title: 'Agenda & Échéances', planStep: 'Étape 7' },
+  NOTIFICATIONS: { title: 'Notifications', planStep: 'Étape 8' },
+  DEBTS: { title: 'Dettes & Créances', planStep: 'Étape 9' },
+  PROJECTS: { title: 'Projets & Épargne', planStep: 'Étape 9' },
+  ANALYTICS: { title: 'Analyses', planStep: 'Étape 11' },
+  SETTINGS: { title: 'Sécurité & Réglages', planStep: 'Étape 12' },
+  TRASH: { title: 'Corbeille', planStep: 'Étape 12' },
+};
+
+/** Onglet surligné pour un écran donné (les modules « Plus » restent sous l'onglet Plus). */
+function tabFor(screen: ScreenName): TabScreen | null {
+  if (isTabScreen(screen)) return screen;
+  if (MODULES.some((m) => m.key === screen)) return 'MORE';
+  return null;
+}
 
 export default function App() {
   const {
     hasUser,
     isLocked,
-    isLoading,
     initAuth,
     checkTimeout,
     recordActivity,
-    lockSession,
   } = useAuthStore();
 
-  const [currentView, setCurrentView] = useState<ActiveView>('DASHBOARD');
+  const [boot, setBoot] = useState<{ progress: number; status: string; error: string | null; done: boolean }>({
+    progress: 0,
+    status: 'Démarrage…',
+    error: null,
+    done: false,
+  });
+  const [onboardingDone, setOnboardingDone] = useState(false);
+  const [authMode, setAuthMode] = useState<{ mode: 'register' | 'login'; email?: string }>({ mode: 'register' });
+
+  const { current: currentView, navigate, replace, reset } = useNavStore();
   const appState = useRef<AppStateStatus>((AppState.currentState ?? 'active') as AppStateStatus);
 
   // 1. Initialisation SQLite et Auth au démarrage
   useEffect(() => {
+    if (IS_AUTH_POPUP) return;
     async function setup() {
+      const startedAt = Date.now();
       try {
+        setBoot((b) => ({ ...b, progress: 0.15, status: 'Ouverture de la base locale…' }));
         await initDatabase();
+        setBoot((b) => ({ ...b, progress: 0.6, status: 'Vérification de la sécurité…' }));
         await initAuth();
+        setOnboardingDone(await isOnboardingDone());
+        setBoot((b) => ({ ...b, progress: 1, status: 'Prêt' }));
+        const wait = MIN_SPLASH_MS - (Date.now() - startedAt);
+        if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+        setBoot((b) => ({ ...b, done: true }));
       } catch (e) {
         console.error('Erreur démarrage GERETOU:', e);
+        setBoot((b) => ({
+          ...b,
+          error: "Impossible d'ouvrir la base de données locale. Fermez puis relancez l'application.",
+        }));
       }
     }
     setup();
@@ -79,24 +128,64 @@ export default function App() {
     };
   }, []);
 
-  // Écran de chargement / Splash
-  if (isLoading) {
+  // Fenêtre de retour Google (web) : elle se ferme d'elle-même.
+  if (IS_AUTH_POPUP) return null;
+
+  // Écran de démarrage : progression réelle de l'initialisation
+  if (!boot.done) {
     return (
-      <View style={styles.splashContainer}>
-        <StatusBar barStyle="light-content" />
-        <Text style={styles.splashLogo}>GERETOU</Text>
-        <Text style={styles.splashTagline}>Gestion Financière & Domestique</Text>
-        <ActivityIndicator size="large" color={colors.primary.container} style={{ marginTop: spacing.xl }} />
-      </View>
+      <>
+        <StatusBar barStyle="dark-content" />
+        <SplashScreen progress={boot.progress} status={boot.status} error={boot.error} />
+      </>
     );
   }
 
-  // Écran 1 : Nouvel utilisateur => Inscription / Onboarding
+  // Écran 1a : premier lancement => découverte (une seule fois)
+  if (!hasUser && !onboardingDone) {
+    return (
+      <>
+        <StatusBar barStyle="dark-content" />
+        <OnboardingScreen
+          onFinish={() => {
+            setAuthMode({ mode: 'register' });
+            setOnboardingDone(true);
+            markOnboardingDone();
+          }}
+          onLogin={() => {
+            setAuthMode({ mode: 'login' });
+            setOnboardingDone(true);
+            markOnboardingDone();
+          }}
+        />
+      </>
+    );
+  }
+
+  // Écran 1b : « J'ai déjà un coffre » => connexion Google + restauration
+  if (!hasUser && authMode.mode === 'login') {
+    return (
+      <>
+        <StatusBar barStyle="dark-content" />
+        <LoginFlow
+          onBack={() => setOnboardingDone(false)}
+          onCreateAccount={(email) => setAuthMode({ mode: 'register', email })}
+        />
+      </>
+    );
+  }
+
+  // Écran 1c : nouvel utilisateur => inscription
   if (!hasUser) {
     return (
       <>
         <StatusBar barStyle="dark-content" />
-        <RegisterScreen />
+        <RegistrationFlow
+          key={authMode.email ?? 'register'}
+          prefillEmail={authMode.email}
+          onBackToOnboarding={() => setOnboardingDone(false)}
+          onLogin={() => setAuthMode({ mode: 'login' })}
+        />
       </>
     );
   }
@@ -117,9 +206,9 @@ export default function App() {
       <>
         <StatusBar barStyle="dark-content" />
         <NouvelleDepenseScreen
-          onClose={() => setCurrentView('DASHBOARD')}
-          onSwitchToIncome={() => setCurrentView('NEW_INCOME')}
-          onSuccess={() => setCurrentView('DASHBOARD')}
+          onClose={reset}
+          onSwitchToIncome={() => replace('NEW_INCOME')}
+          onSuccess={reset}
         />
       </>
     );
@@ -131,43 +220,51 @@ export default function App() {
       <>
         <StatusBar barStyle="dark-content" />
         <NouveauRevenuScreen
-          onClose={() => setCurrentView('DASHBOARD')}
-          onSwitchToExpense={() => setCurrentView('NEW_EXPENSE')}
-          onSuccess={() => setCurrentView('DASHBOARD')}
+          onClose={reset}
+          onSwitchToExpense={() => replace('NEW_EXPENSE')}
+          onSuccess={reset}
         />
       </>
     );
   }
 
-  // Écran 5 : Session active => Tableau de bord principal avec FAB
-  return (
-    <>
-      <StatusBar barStyle="dark-content" />
+  // Écran 5 : Session active => écran courant + barre d'onglets
+  const activeTab = tabFor(currentView);
+  const upcoming = UPCOMING[currentView];
+
+  let screen: React.ReactNode;
+  if (currentView === 'DASHBOARD') {
+    screen = (
       <DashboardScreen
-        onOpenNewExpense={() => setCurrentView('NEW_EXPENSE')}
-        onOpenNewIncome={() => setCurrentView('NEW_INCOME')}
+        onOpenNewExpense={() => navigate('NEW_EXPENSE')}
+        onOpenNewIncome={() => navigate('NEW_INCOME')}
       />
-    </>
+    );
+  } else if (currentView === 'MORE') {
+    screen = <MoreScreen />;
+  } else if (currentView === 'BUDGETS') {
+    screen = <BudgetsScreen />;
+  } else if (currentView === 'WALLETS') {
+    screen = <WalletsScreen />;
+  } else if (currentView === 'BACKUP') {
+    screen = <BackupScreen />;
+  } else if (upcoming) {
+    screen = <UpcomingScreen {...upcoming} showBack={!isTabScreen(currentView)} />;
+  }
+
+  return (
+    <View style={styles.shell}>
+      <StatusBar barStyle="dark-content" />
+      <View style={styles.shell}>{screen}</View>
+      {activeTab ? <TabBar activeTab={activeTab} /> : null}
+      <ToastHost />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  splashContainer: {
+  shell: {
     flex: 1,
-    backgroundColor: colors.primary.DEFAULT,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xl,
-  },
-  splashLogo: {
-    fontSize: typography.sizes.hero,
-    fontWeight: typography.weights.extrabold,
-    color: colors.text.inverted,
-    letterSpacing: 3,
-  },
-  splashTagline: {
-    fontSize: typography.sizes.bodySm,
-    color: colors.primary.container,
-    marginTop: spacing.xs,
+    backgroundColor: colors.surface.canvas,
   },
 });

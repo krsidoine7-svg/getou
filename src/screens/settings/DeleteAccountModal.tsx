@@ -5,20 +5,21 @@
  * - Application du Soft Delete (is_archived = 1) une fois le solde à 0 pour préserver l'historique comptable.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Modal,
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
+import { X, TriangleAlert } from 'lucide-react-native';
 import { Account } from '../../types/database';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { Badge } from '../../components/common/Badge';
 import { useWalletStore } from '../../store/useWalletStore';
+import { showToast } from '../../store/useToastStore';
 import { colors, radii, spacing, typography, formatFCFA } from '../../theme/tokens';
 
 interface DeleteAccountModalProps {
@@ -37,52 +38,46 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
   onSuccess,
 }) => {
   const { transferFundsBeforeDeletion, softDeleteAccount, isLoading } = useWalletStore();
-  const [selectedDestId, setSelectedDestId] = useState<string>(
-    otherAccounts[0]?.id || ''
-  );
+  const [selectedDestId, setSelectedDestId] = useState<string>(otherAccounts[0]?.id || '');
+  const [error, setError] = useState<string | null>(null);
+
+  // Réinitialise le compte destinataire et l'erreur à chaque ouverture
+  useEffect(() => {
+    if (visible) {
+      setSelectedDestId(otherAccounts[0]?.id || '');
+      setError(null);
+    }
+  }, [visible, account?.id]);
 
   if (!account) return null;
 
   const hasPositiveBalance = account.balance > 0;
 
   const handleTransferAndClose = async () => {
-    if (!selectedDestId) {
-      Alert.alert('Erreur', 'Veuillez sélectionner un compte destinataire pour transférer les fonds.');
-      return;
-    }
+    setError(null);
+    if (!selectedDestId) return setError('Choisissez le compte qui recevra les fonds.');
 
     const transferSuccess = await transferFundsBeforeDeletion(account.id, selectedDestId);
-    if (!transferSuccess) {
-      Alert.alert('Échec', 'Impossible de transférer les fonds.');
-      return;
-    }
+    if (!transferSuccess) return setError('Impossible de transférer les fonds. Réessayez.');
 
-    // Effectuer le soft delete
     const deleteSuccess = await softDeleteAccount(account.id, account.user_id);
-    if (deleteSuccess) {
-      Alert.alert(
-        'Compte Clôturé avec Succès',
-        `Les ${formatFCFA(account.balance)} ont été transférés et le compte "${account.name}" a été archivé (Soft Delete) sans perte d'historique.`
-      );
-      onSuccess();
-      onClose();
-    } else {
-      Alert.alert('Erreur', "Échec de l'archivage du compte.");
-    }
+    if (!deleteSuccess) return setError("Les fonds ont été transférés, mais l'archivage a échoué. Réessayez.");
+    showToast({
+      kind: 'success',
+      title: 'Compte clôturé',
+      message: `${formatFCFA(account.balance)} transférés, « ${account.name} » archivé. Son historique est conservé.`,
+    });
+    onSuccess();
+    onClose();
   };
 
   const handleDirectSoftDelete = async () => {
+    setError(null);
     const success = await softDeleteAccount(account.id, account.user_id);
-    if (success) {
-      Alert.alert(
-        'Compte Archivé',
-        `Le compte "${account.name}" a été archivé (Soft Delete). Son historique passé reste consultable dans vos bilans.`
-      );
-      onSuccess();
-      onClose();
-    } else {
-      Alert.alert('Erreur', "Échec de l'archivage du compte.");
-    }
+    if (!success) return setError(useWalletStore.getState().error || "Échec de l'archivage du compte.");
+    showToast({ kind: 'success', title: 'Compte archivé', message: `« ${account.name} » est archivé. Son historique est conservé.` });
+    onSuccess();
+    onClose();
   };
 
   return (
@@ -93,9 +88,16 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
           <View style={styles.header}>
             <Text style={styles.modalTitle}>Suppression du Compte</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Text style={styles.closeText}>✕</Text>
+              <X size={20} color={colors.text.primary} accessibilityLabel="Fermer" />
             </TouchableOpacity>
           </View>
+
+          {error ? (
+            <View style={styles.errorBox} accessibilityRole="alert">
+              <TriangleAlert size={16} color={colors.accent.danger} />
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          ) : null}
 
           <Text style={styles.accountName}>
             {account.name} ({account.type})
@@ -201,6 +203,18 @@ export const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
 };
 
 const styles = StyleSheet.create({
+  errorBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.accent.dangerBg,
+    borderColor: colors.accent.dangerBorder,
+    borderWidth: 1,
+    borderRadius: radii.md,
+    padding: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  errorText: { flex: 1, color: colors.accent.danger, fontSize: typography.sizes.bodySm, fontWeight: typography.weights.semibold },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(15, 23, 42, 0.75)',
@@ -230,10 +244,6 @@ const styles = StyleSheet.create({
   },
   closeBtn: {
     padding: spacing.xs,
-  },
-  closeText: {
-    fontSize: 18,
-    color: colors.text.muted,
   },
   accountName: {
     fontSize: typography.sizes.bodySm,

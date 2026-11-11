@@ -6,6 +6,7 @@
 export interface User {
   id: string;
   email: string;
+  display_name?: string | null;
   pin_hash: string;
   biometric_enabled: number; // 0 ou 1
   created_at: string;
@@ -56,6 +57,13 @@ export interface Transaction {
   nature: TransactionNature;
   urgency: TransactionUrgency;
   provenance?: IncomeProvenance | null;
+  /** Icône de la catégorie (jointure, lecture seule). */
+  category_icon?: string | null;
+  /** Nom de la catégorie (jointure, lecture seule). */
+  category_name?: string | null;
+  /** Compte débité / crédité (jointure, lecture seule). */
+  account_name?: string | null;
+  account_type?: AccountType | null;
   date: string;
   notes?: string | null;
   receipt_uri?: string | null;

@@ -4,6 +4,8 @@
  */
 
 import { getDatabase, withTransaction } from '../db/database';
+import * as Crypto from 'expo-crypto';
+import { executeTransfer, TransferParams } from './transferCore';
 import { Account, AccountType, AccountSubType } from '../../types/database';
 
 export interface WalletSummary {
@@ -224,5 +226,24 @@ export class AccountService {
 
     if (!created) throw new Error('Échec de la création du compte');
     return created;
+  }
+
+  /**
+   * Virement interne neutre entre deux comptes (frais éventuels comptés en dépense).
+   * Tout ou rien : exécuté dans une transaction SQLite.
+   */
+  public static async transfer(params: TransferParams): Promise<void> {
+    await withTransaction(async (txDb) => {
+      await executeTransfer(
+        {
+          get: (sql, p = []) => txDb.getFirstAsync(sql, p as never[]),
+          run: async (sql, p = []) => {
+            await txDb.runAsync(sql, p as never[]);
+          },
+        },
+        params,
+        () => Crypto.randomUUID()
+      );
+    });
   }
 }

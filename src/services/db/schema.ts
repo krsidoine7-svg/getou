@@ -8,6 +8,7 @@ export const SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
+    display_name TEXT,
     pin_hash TEXT NOT NULL,
     biometric_enabled INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -191,6 +192,7 @@ export const INITIAL_CATEGORIES = [
   { id: 'cat_sante', name: 'Santé & Pharmacie', icon: 'activity', color: '#EF4444', type: 'EXPENSE', is_default: 1 },
   { id: 'cat_loisirs', name: 'Loisirs & Sorties', icon: 'coffee', color: '#EC4899', type: 'EXPENSE', is_default: 1 },
   { id: 'cat_imprevus', name: 'Imprévus & Urgences', icon: 'alert-triangle', color: '#DC2626', type: 'EXPENSE', is_default: 1 },
+  { id: 'cat_frais', name: 'Frais & commissions', icon: 'tag', color: '#64748B', type: 'EXPENSE', is_default: 1 },
   { id: 'cat_salaire', name: 'Salaire Principal', icon: 'briefcase', color: '#0B4F3A', type: 'INCOME', is_default: 1 },
   { id: 'cat_freelance', name: 'Freelance & Business', icon: 'trending-up', color: '#059669', type: 'INCOME', is_default: 1 },
   { id: 'cat_dons', name: 'Cadeaux & Dons reçus', icon: 'gift', color: '#6366F1', type: 'INCOME', is_default: 1 },

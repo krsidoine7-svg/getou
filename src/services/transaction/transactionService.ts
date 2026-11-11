@@ -47,7 +47,7 @@ export class TransactionService {
     const db = await getDatabase();
     if (type) {
       return await db.getAllAsync<Category>(
-        'SELECT * FROM categories WHERE type = ? OR type = "BOTH" ORDER BY is_default DESC, name ASC;',
+        "SELECT * FROM categories WHERE type = ? OR type = 'BOTH' ORDER BY is_default DESC, name ASC;",
         [type]
       );
     }
@@ -85,9 +85,12 @@ export class TransactionService {
   public static async getRecentTransactions(userId: string, limit: number = 20): Promise<Transaction[]> {
     const db = await getDatabase();
     return await db.getAllAsync<Transaction>(
-      `SELECT * FROM transactions
-       WHERE user_id = ? AND is_deleted = 0
-       ORDER BY date DESC LIMIT ?;`,
+      `SELECT t.*, c.icon AS category_icon, c.name AS category_name, a.name AS account_name, a.type AS account_type
+       FROM transactions t
+       LEFT JOIN categories c ON c.id = t.category_id
+       LEFT JOIN accounts a ON a.id = t.account_id
+       WHERE t.user_id = ? AND t.is_deleted = 0
+       ORDER BY t.date DESC LIMIT ?;`,
       [userId, limit]
     );
   }

@@ -5,6 +5,7 @@
 
 import { create } from 'zustand';
 import { AccountService, WalletSummary } from '../services/account/accountService';
+import type { TransferParams } from '../services/account/transferCore';
 import { Account, AccountType, AccountSubType } from '../types/database';
 
 interface WalletState {
@@ -26,6 +27,8 @@ interface WalletState {
   checkCanDelete: (accountId: string) => Promise<{ canDelete: boolean; balance: number; reason?: string }>;
   transferFundsBeforeDeletion: (fromId: string, toId: string) => Promise<boolean>;
   softDeleteAccount: (accountId: string, userId: string) => Promise<boolean>;
+  /** Virement interne ; renvoie null si succès, sinon le message d'erreur à afficher. */
+  transfer: (params: TransferParams) => Promise<string | null>;
 }
 
 export const useWalletStore = create<WalletState>((set, get) => ({
@@ -85,6 +88,18 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     } catch (err: any) {
       set({ isLoading: false, error: err.message });
       return false;
+    }
+  },
+
+  transfer: async (params) => {
+    try {
+      set({ isLoading: true, error: null });
+      await AccountService.transfer(params);
+      await get().fetchWallet(params.userId);
+      return null;
+    } catch (err: any) {
+      set({ isLoading: false, error: err.message });
+      return err?.message || 'Virement impossible.';
     }
   },
 
