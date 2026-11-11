@@ -1,14 +1,48 @@
+# ── Dépendances & builds ──────────────────────────────
 node_modules/
 .expo/
 dist/
 web-build/
+android/
+ios/
+coverage/
+*.tsbuildinfo
+
+# ── Secrets & variables d'environnement ───────────────
+# Seul .env.example (sans valeurs) est versionné.
+.env
+.env.*
+!.env.example
+
+# Identifiants Google téléchargés (contiennent un client_secret)
+client_secret_*.json
+credentials*.json
+google-services.json
+GoogleService-Info.plist
+service-account*.json
+
+# Clés de signature & certificats (Android / iOS / EAS)
 *.jks
+*.keystore
 *.p8
 *.p12
+*.pem
 *.key
 *.mobileprovision
+credentials.json
+
+# ── Notes personnelles & outils locaux ────────────────
+hum.md
+.claude/
+.playwright-mcp/
+.vscode/
+.idea/
+
+# ── Divers ────────────────────────────────────────────
 *.orig.*
-.env*.local
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.DS_Store
+Thumbs.db
