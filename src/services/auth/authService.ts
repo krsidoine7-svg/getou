@@ -18,6 +18,7 @@ import {
   remainingFreeAttempts,
 } from './pinSecurity';
 import { makeGuestEmail } from './identity';
+import { validatePin } from './pinRules';
 import { getDatabase, withTransaction } from '../db/database';
 import { User, Account } from '../../types/database';
 
@@ -156,8 +157,6 @@ export class AuthService {
 
   /**
    * Enregistrement complet d'un nouvel utilisateur avec création de son portefeuille de départ
-   */
-  /**
    * @param email adresse Google si connue ; null = profil invité (aucun compte requis).
    */
   public static async registerUser(
@@ -326,6 +325,90 @@ export class AuthService {
     });
 
     return result.success;
+  }
+
+  /**
+   * Modification sécurisée du code PIN :
+   * 1. Vérification de l'ancien code
+   * 2. Validation des règles anti-codes faibles
+   * 3. Hachage salé PBKDF2 avec pepper SecureStore
+   */
+  public static async changePin(
+    oldPin: string,
+    newPin: string
+  ): Promise<{ success: boolean; error?: string }> {
+    const user = await this.getActiveUser();
+    if (!user) return { success: false, error: 'Aucun utilisateur connecté.' };
+
+    const checkOld = await this.verifyPin(oldPin);
+    if (!checkOld.success) {
+      return { success: false, error: 'Ancien code PIN incorrect.' };
+    }
+
+    const pinErr = validatePin(newPin);
+    if (pinErr) {
+      return { success: false, error: pinErr };
+    }
+
+    const newHash = await this.createPinHash(newPin);
+    const db = await getDatabase();
+    await db.runAsync(
+      'UPDATE users SET pin_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?;',
+      [newHash, user.id]
+    );
+
+    return { success: true };
+  }
+
+  /**
+   * Activation ou désactivation de la biométrie (Touch ID / Face ID)
+   */
+  public static async toggleBiometrics(
+    enable: boolean
+  ): Promise<{ success: boolean; error?: string }> {
+    const user = await this.getActiveUser();
+    if (!user) return { success: false, error: 'Aucun utilisateur connecté.' };
+
+    if (enable) {
+      const bio = await this.checkBiometricsAvailable();
+      if (!bio.hasHardware || !bio.isEnrolled) {
+        return {
+          success: false,
+          error: 'Capteur biométrique non disponible ou aucune empreinte enregistrée sur cet appareil.',
+        };
+      }
+      const confirmed = await this.promptBiometrics(
+        'Confirmez votre empreinte pour activer le déverrouillage biométrique'
+      );
+      if (!confirmed) {
+        return { success: false, error: 'Vérification biométrique non confirmée.' };
+      }
+    }
+
+    const db = await getDatabase();
+    await db.runAsync(
+      'UPDATE users SET biometric_enabled = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?;',
+      [enable ? 1 : 0, user.id]
+    );
+
+    return { success: true };
+  }
+
+  /**
+   * Mise à jour du nom / pseudo de profil
+   */
+  public static async updateDisplayName(displayName: string): Promise<User> {
+    const user = await this.getActiveUser();
+    if (!user) throw new Error('Aucun utilisateur connecté.');
+
+    const trimmed = displayName.trim();
+    const db = await getDatabase();
+    await db.runAsync(
+      'UPDATE users SET display_name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?;',
+      [trimmed || null, user.id]
+    );
+
+    return { ...user, display_name: trimmed || null };
   }
 
   /**

@@ -30,7 +30,7 @@ import { notificationsSupported } from '../../services/agenda/deadlineNotificati
 import { ACCOUNT_BRAND } from '../../theme/brand';
 import { colors, radii, spacing, typography, formatFCFA } from '../../theme/tokens';
 
-const KINDS: DeadlineKind[] = ['BILL', 'RENT', 'TONTINE', 'SUBSCRIPTION', 'OTHER'];
+const KINDS: DeadlineKind[] = ['BILL', 'RENT', 'SUBSCRIPTION', 'OTHER'];
 const TIMES = ['07:00', '09:00', '12:00', '18:00'];
 const REMINDERS = [
   { v: 0, l: 'Le jour J' },

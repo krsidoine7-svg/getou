@@ -21,6 +21,7 @@ import {
   Laptop,
   ShoppingBag,
   Coins,
+  SprayCan,
   LucideIcon,
 } from 'lucide-react-native';
 import { IncomeProvenance } from '../../types/database';
@@ -38,6 +39,7 @@ export const CATEGORY_ICONS: Record<string, LucideIcon> = {
   gift: Gift, // Cadeaux & dons
   handshake: Handshake, // Emprunts
   tag: Tag, // Catégorie personnalisée
+  droplet: SprayCan, // Maison & hygiène (courses de produits ménagers)
 };
 
 /** Icônes proposées lors de la création d'une catégorie. */

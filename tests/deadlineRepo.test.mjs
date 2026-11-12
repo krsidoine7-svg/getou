@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { DatabaseSync } from 'node:sqlite';
 import { SCHEMA_SQL, INITIAL_CATEGORIES } from '../src/services/db/schema.ts';
 import {
-  saveDeadline, listDeadlines, payDeadline, markDeadlinePaid, postponeDeadline, deleteDeadline, DeadlineError,
+  saveDeadline, getDeadline, listDeadlines, payDeadline, markDeadlinePaid, postponeDeadline, deleteDeadline, DeadlineError,
 } from '../src/services/agenda/deadlineRepo.ts';
 
 let db, seq;
@@ -68,10 +68,12 @@ test('solde insuffisant : rien ne bouge', async () => {
   assert.equal(db.prepare('SELECT COUNT(*) n FROM transactions').get().n, 0);
 });
 
-test('tontine : catégorie « Tontine & Cercle »', async () => {
-  const id = await saveDeadline(adapter(), { ...base, kind: 'TONTINE', recurrence: 'NONE' }, newId);
+test('ancien type « TONTINE » : lu comme « Autre dépense » et réglé en Imprévus', async () => {
+  const id = await saveDeadline(adapter(), { ...base, recurrence: 'NONE' }, newId);
+  db.prepare("UPDATE deadlines SET kind = 'TONTINE' WHERE id = ?").run(id);
+  assert.equal((await getDeadline(adapter(), 'u1', id)).kind, 'OTHER');
   const { transactionId, nextId } = await payDeadline(adapter(), { userId: 'u1', deadlineId: id, accountId: 'wave' }, newId);
-  assert.equal(db.prepare('SELECT category_id FROM transactions WHERE id = ?').get(transactionId).category_id, 'cat_tontine');
+  assert.equal(db.prepare('SELECT category_id FROM transactions WHERE id = ?').get(transactionId).category_id, 'cat_imprevus');
   assert.equal(nextId, null);
 });
 

@@ -4,7 +4,7 @@
  * Les opérations d'écriture multiples doivent être exécutées dans une transaction par l'appelant.
  */
 
-import { KIND_CATEGORY, KIND_LABELS, nextDueDate, parseDay, addDays } from './deadlineCore.ts';
+import { KIND_CATEGORY, KIND_LABELS, normalizeKind, nextDueDate, parseDay, addDays } from './deadlineCore.ts';
 import type { DeadlineKind, DeadlinePriority, Recurrence } from './deadlineCore.ts';
 
 export interface SqlDb {
@@ -65,22 +65,24 @@ export function validateDeadlineInput(i: Pick<DeadlineInput, 'title' | 'amount' 
 }
 
 export async function listDeadlines(db: SqlDb, userId: string, includePaid = false): Promise<Deadline[]> {
-  return db.all<Deadline>(
+  const rows = await db.all<Deadline>(
     `SELECT d.*, a.name AS account_name, a.type AS account_type
      FROM deadlines d LEFT JOIN accounts a ON a.id = d.account_id
      WHERE d.user_id = ? ${includePaid ? '' : "AND d.status = 'PENDING'"}
      ORDER BY d.due_date, d.remind_time, d.title;`,
     [userId]
   );
+  return rows.map((d) => ({ ...d, kind: normalizeKind(d.kind) }));
 }
 
 export async function getDeadline(db: SqlDb, userId: string, id: string): Promise<Deadline | null> {
-  return db.get<Deadline>(
+  const d = await db.get<Deadline>(
     `SELECT d.*, a.name AS account_name, a.type AS account_type
      FROM deadlines d LEFT JOIN accounts a ON a.id = d.account_id
      WHERE d.id = ? AND d.user_id = ?;`,
     [id, userId]
   );
+  return d ? { ...d, kind: normalizeKind(d.kind) } : null;
 }
 
 export async function saveDeadline(db: SqlDb, input: DeadlineInput, newId: () => string, editingId?: string): Promise<string> {
@@ -163,11 +165,6 @@ export async function payDeadline(
 
   const now = new Date().toISOString();
   const categoryId = KIND_CATEGORY[d.kind];
-  if (d.kind === 'TONTINE') {
-    await db.run(
-      `INSERT OR IGNORE INTO categories (id, name, icon, color, type, is_default) VALUES ('cat_tontine', 'Tontine & Cercle', 'handshake', '#7C3AED', 'EXPENSE', 1);`
-    );
-  }
   const txId = `tx_dl_${newId()}`;
   await db.run(
     `INSERT INTO transactions (id, user_id, amount, account_id, destination_account_id, category_id, type, nature, urgency, provenance, date, notes, is_deleted, created_at, updated_at)
@@ -205,5 +202,5 @@ export async function setNotificationId(db: SqlDb, id: string, notificationId: s
 
 /** Titre proposé quand l'utilisateur choisit un type sans avoir saisi d'intitulé. */
 export function defaultTitle(kind: DeadlineKind): string {
-  return { BILL: 'Facture', RENT: 'Loyer', TONTINE: 'Cotisation tontine', SUBSCRIPTION: 'Abonnement', OTHER: KIND_LABELS.OTHER }[kind];
+  return { BILL: 'Facture', RENT: 'Loyer', SUBSCRIPTION: 'Abonnement', OTHER: KIND_LABELS.OTHER }[kind];
 }

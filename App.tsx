@@ -13,12 +13,18 @@ import { TabBar } from './src/components/navigation/TabBar';
 import { MoreScreen, MODULES } from './src/screens/more/MoreScreen';
 import { UpcomingScreen } from './src/screens/more/UpcomingScreen';
 import { BackupScreen } from './src/screens/settings/BackupScreen';
+import { SettingsScreen } from './src/screens/settings/SettingsScreen';
+import { TrashScreen } from './src/screens/trash/TrashScreen';
 import { WalletsScreen } from './src/screens/wallets/WalletsScreen';
 import { BudgetsScreen } from './src/screens/budgets/BudgetsScreen';
+import { StocksScreen } from './src/screens/stocks/StocksScreen';
+import { AnalyticsScreen } from './src/screens/analytics/AnalyticsScreen';
 import { AgendaScreen } from './src/screens/agenda/AgendaScreen';
 import { DeadlineAlertScreen } from './src/screens/agenda/DeadlineAlertScreen';
 import { useAgendaStore } from './src/store/useAgendaStore';
 import { NotificationsScreen } from './src/screens/notifications/NotificationsScreen';
+import { DebtsScreen } from './src/screens/debts/DebtsScreen';
+import { ProjectsScreen } from './src/screens/projects/ProjectsScreen';
 import { NotificationSettingsScreen } from './src/screens/notifications/NotificationSettingsScreen';
 import { initDeadlineNotifications, listenDeadlineTaps } from './src/services/agenda/deadlineNotifications';
 import { ToastHost } from './src/components/common/ToastHost';
@@ -40,15 +46,8 @@ const IS_AUTH_POPUP = WebBrowser.maybeCompleteAuthSession().type === 'success';
 /** Durée minimale d'affichage du splash, pour éviter un simple flash à l'écran. */
 const MIN_SPLASH_MS = 900;
 
-/** Écrans pas encore intégrés → étape du plan qui les livrera (doc/PLAN_ECRANS_STITCH.md). */
-const UPCOMING: Partial<Record<ScreenName, { title: string; planStep: string }>> = {
-  STOCKS: { title: 'Stocks & Courses', planStep: 'Étape 10' },
-  DEBTS: { title: 'Dettes & Créances', planStep: 'Étape 9' },
-  PROJECTS: { title: 'Projets & Épargne', planStep: 'Étape 9' },
-  ANALYTICS: { title: 'Analyses', planStep: 'Étape 11' },
-  SETTINGS: { title: 'Sécurité & Réglages', planStep: 'Étape 12' },
-  TRASH: { title: 'Corbeille', planStep: 'Étape 12' },
-};
+/** Écrans pas encore intégrés (tous les écrans principaux et secondaires sont désormais intégrés). */
+const UPCOMING: Partial<Record<ScreenName, { title: string; planStep: string }>> = {};
 
 /** Onglet surligné pour un écran donné (les modules « Plus » restent sous l'onglet Plus). */
 function tabFor(screen: ScreenName): TabScreen | null {
@@ -256,20 +255,32 @@ export default function App() {
     );
   } else if (currentView === 'MORE') {
     screen = <MoreScreen />;
+  } else if (currentView === 'DEBTS') {
+    screen = <DebtsScreen />;
+  } else if (currentView === 'PROJECTS') {
+    screen = <ProjectsScreen />;
   } else if (currentView === 'NOTIFICATIONS') {
     screen = <NotificationsScreen />;
   } else if (currentView === 'NOTIF_SETTINGS') {
     screen = <NotificationSettingsScreen />;
   } else if (currentView === 'AGENDA') {
     screen = <AgendaScreen />;
+  } else if (currentView === 'ANALYTICS') {
+    screen = <AnalyticsScreen />;
   } else if (currentView === 'DEADLINE_ALERT') {
     screen = <DeadlineAlertScreen />;
   } else if (currentView === 'BUDGETS') {
     screen = <BudgetsScreen />;
+  } else if (currentView === 'STOCKS') {
+    screen = <StocksScreen />;
   } else if (currentView === 'WALLETS') {
     screen = <WalletsScreen />;
   } else if (currentView === 'BACKUP') {
     screen = <BackupScreen />;
+  } else if (currentView === 'SETTINGS') {
+    screen = <SettingsScreen />;
+  } else if (currentView === 'TRASH') {
+    screen = <TrashScreen />;
   } else if (upcoming) {
     screen = <UpcomingScreen {...upcoming} showBack={!isTabScreen(currentView)} />;
   }

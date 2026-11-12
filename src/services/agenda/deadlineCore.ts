@@ -3,7 +3,14 @@
  * Module pur (testable sous Node). Les dates d'échéance sont des jours locaux « AAAA-MM-JJ ».
  */
 
-export type DeadlineKind = 'BILL' | 'RENT' | 'TONTINE' | 'SUBSCRIPTION' | 'OTHER';
+export type DeadlineKind = 'BILL' | 'RENT' | 'SUBSCRIPTION' | 'OTHER';
+
+const KINDS: readonly string[] = ['BILL', 'RENT', 'SUBSCRIPTION', 'OTHER'];
+
+/** Type connu, sinon « OTHER » (anciennes données, ex. l'ex-type « TONTINE »). */
+export function normalizeKind(kind: string): DeadlineKind {
+  return (KINDS.includes(kind) ? kind : 'OTHER') as DeadlineKind;
+}
 export type Recurrence = 'NONE' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY';
 export type DeadlinePriority = 'NORMAL' | 'HIGH' | 'VITAL';
 export type DeadlineBucket = 'overdue' | 'urgent' | 'upcoming';
@@ -11,7 +18,6 @@ export type DeadlineBucket = 'overdue' | 'urgent' | 'upcoming';
 export const KIND_LABELS: Record<DeadlineKind, string> = {
   BILL: 'Factures',
   RENT: 'Loyer & logement',
-  TONTINE: 'Tontine & cercle',
   SUBSCRIPTION: 'Abonnements',
   OTHER: 'Autre dépense',
 };
@@ -20,7 +26,6 @@ export const KIND_LABELS: Record<DeadlineKind, string> = {
 export const KIND_CATEGORY: Record<DeadlineKind, string> = {
   BILL: 'cat_factures',
   RENT: 'cat_loyer',
-  TONTINE: 'cat_tontine',
   SUBSCRIPTION: 'cat_factures',
   OTHER: 'cat_imprevus',
 };

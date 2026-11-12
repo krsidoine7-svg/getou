@@ -24,6 +24,10 @@ test('avec motif : le motif en titre, la nature en sous-titre', () => {
   });
 });
 
+test('mouvements liés aux dettes', () => {
+  assert.equal(describeTransaction({ type: 'TRANSFER', provenance: 'DEBT_OUT', notes: 'Prêt à Moussa' }).kind, 'Dettes & créances');
+});
+
 test('repli sur le type quand rien d’autre n’est connu', () => {
   assert.equal(txKind({ type: 'EXPENSE' }), 'Dépense');
   assert.equal(txKind({ type: 'TRANSFER' }), 'Virement interne');
@@ -33,5 +37,5 @@ test('repli sur le type quand rien d’autre n’est connu', () => {
 test('tuiles de catégorie : nom court + précision, repli sur le nom complet', async () => {
   const { categoryDisplay } = await import('../src/services/transaction/labels.ts');
   assert.deepEqual(categoryDisplay({ id: 'cat_transp', name: 'Transport & Carburant' }), { short: 'Transport', hint: 'Carburant, taxi, gbaka' });
-  assert.deepEqual(categoryDisplay({ id: 'cat_x', name: 'Tontine' }), { short: 'Tontine', hint: 'Catégorie personnalisée' });
+  assert.deepEqual(categoryDisplay({ id: 'cat_x', name: 'Coiffure' }), { short: 'Coiffure', hint: 'Catégorie personnalisée' });
 });

@@ -145,7 +145,7 @@ export const AgendaScreen: React.FC = () => {
         </Pressable>
         <View style={{ flex: 1 }}>
           <Text style={styles.title}>Agenda & Échéances</Text>
-          <Text style={styles.subtitle}>Factures, loyers et tontines à venir</Text>
+          <Text style={styles.subtitle}>Factures, loyers et abonnements à venir</Text>
         </View>
         <Pressable onPress={() => setEditor({})} accessibilityRole="button" style={({ pressed }) => [styles.addBtn, pressed && { opacity: 0.85 }]}>
           <Plus size={18} color={colors.text.inverted} />
@@ -233,7 +233,7 @@ export const AgendaScreen: React.FC = () => {
           <View style={styles.empty}>
             <CalendarClock size={32} color={colors.text.muted} />
             <Text style={styles.emptyTitle}>Aucune échéance à venir</Text>
-            <Text style={styles.emptyText}>Ajoutez vos factures, loyer ou cotisations de tontine : GERETOU vous prévient avant la date.</Text>
+            <Text style={styles.emptyText}>Ajoutez vos factures, loyer ou abonnements : GERETOU vous prévient avant la date.</Text>
           </View>
         ) : visible.length === 0 ? (
           <Text style={styles.emptyText}>Aucune échéance pour ce filtre.</Text>

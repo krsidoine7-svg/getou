@@ -58,6 +58,27 @@ async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
   if (!userColumns.some((c) => c.name === 'display_name')) {
     await db.execAsync('ALTER TABLE users ADD COLUMN display_name TEXT;');
   }
+  // Étape 10 (stocks) : niveau « plein » et date du dernier réapprovisionnement.
+  const stockColumns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(stocks);');
+  if (!stockColumns.some((c) => c.name === 'target_qty')) {
+    await db.execAsync('ALTER TABLE stocks ADD COLUMN target_qty REAL;');
+  }
+  if (!stockColumns.some((c) => c.name === 'last_restocked_at')) {
+    await db.execAsync('ALTER TABLE stocks ADD COLUMN last_restocked_at TEXT;');
+  }
+  // Étape 12 (corbeille) : horodatage de suppression douce
+  const txColumns = await db.getAllAsync<{ name: string }>('PRAGMA table_info(transactions);');
+  if (!txColumns.some((c) => c.name === 'deleted_at')) {
+    await db.execAsync('ALTER TABLE transactions ADD COLUMN deleted_at TEXT;');
+  }
+  // La tontine n'est plus proposée : anciennes échéances -> « Autre dépense »,
+  // catégorie par défaut retirée si rien ne l'utilise (l'historique est conservé sinon).
+  await db.execAsync(`
+    UPDATE deadlines SET kind = 'OTHER' WHERE kind = 'TONTINE';
+    DELETE FROM categories WHERE id = 'cat_tontine'
+      AND NOT EXISTS (SELECT 1 FROM transactions WHERE category_id = 'cat_tontine')
+      AND NOT EXISTS (SELECT 1 FROM budgets WHERE category_id = 'cat_tontine');
+  `);
 }
 
 /**

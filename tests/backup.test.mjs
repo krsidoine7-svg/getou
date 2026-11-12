@@ -27,7 +27,7 @@ function seedPhoneA(db) {
   db.exec(`
     INSERT INTO users (id, email, display_name, pin_hash, biometric_enabled) VALUES ('usr_1', 'alex@gmail.com', 'Alex Konan', 'pbkdf2-sha256$10000$aa$bb', 1);
     INSERT INTO categories (id, name, icon, color, type, is_default) VALUES ('cat_alim', 'Alimentation', 'shopping-cart', '#10B981', 'EXPENSE', 1);
-    INSERT INTO categories (id, name, icon, color, type, is_default) VALUES ('cat_perso', 'Tontine', 'tag', '#111111', 'EXPENSE', 0);
+    INSERT INTO categories (id, name, icon, color, type, is_default) VALUES ('cat_perso', 'Coiffure', 'tag', '#111111', 'EXPENSE', 0);
     INSERT INTO accounts (id, user_id, name, type, balance) VALUES ('acc_wave', 'usr_1', 'Wave', 'WAVE', 20000);
     INSERT INTO accounts (id, user_id, name, type, balance, is_archived) VALUES ('acc_old', 'usr_1', 'Ancien', 'CASH', 0, 1);
     INSERT INTO transactions (id, user_id, amount, account_id, category_id, type, date, notes)

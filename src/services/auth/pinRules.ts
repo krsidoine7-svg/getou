@@ -28,4 +28,6 @@ export function pinWeakness(pin: string): string | null {
   return null;
 }
 
+export const validatePin = pinWeakness;
+
 const COMMON_PINS = new Set(['1212', '6969', '1004', '2000', '2580', '0852', '1122', '1313', '4545', '1010']);

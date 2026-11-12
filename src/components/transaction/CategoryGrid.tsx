@@ -120,7 +120,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
                 setNewCatName(t);
                 setModalError(null);
               }}
-              placeholder="ex : Coiffure, Tontine, Scolarité…"
+              placeholder="ex : Coiffure, Scolarité, Église…"
               error={modalError ?? undefined}
             />
             <Text style={styles.iconLabel}>Icône</Text>

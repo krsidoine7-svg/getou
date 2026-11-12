@@ -30,6 +30,7 @@ export interface TxLabelInput {
 /** Nature de la transaction : catégorie, sinon provenance, sinon type. */
 export function txKind(tx: TxLabelInput): string {
   if (tx.category_name) return tx.category_name;
+  if (tx.provenance === 'DEBT_IN' || tx.provenance === 'DEBT_OUT') return 'Dettes & créances';
   if (tx.provenance && tx.provenance in PROVENANCE_LABELS) return PROVENANCE_LABELS[tx.provenance as IncomeProvenance];
   return TYPE_LABELS[tx.type] ?? 'Opération';
 }
@@ -54,7 +55,6 @@ const CATEGORY_DISPLAY: Record<string, { short: string; hint: string }> = {
   cat_loisirs: { short: 'Loisirs', hint: 'Famille & sorties' },
   cat_imprevus: { short: 'Imprévus', hint: 'Dépannage, urgences' },
   cat_frais: { short: 'Frais', hint: 'Commissions Wave, MoMo…' },
-  cat_tontine: { short: 'Tontine', hint: 'Cotisation, cercle' },
 };
 
 export function categoryDisplay(cat: { id: string; name: string }): { short: string; hint: string } {

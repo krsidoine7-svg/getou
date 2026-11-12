@@ -4,7 +4,13 @@
     "slug": "geretou",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F8FAFC"
+    },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.geretou.app",
@@ -14,6 +20,7 @@
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0B4F3A"
       },
       "package": "com.geretou.app",
@@ -22,6 +29,9 @@
         "USE_FINGERPRINT",
         "POST_NOTIFICATIONS"
       ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
     },
     "plugins": [
       [
@@ -42,8 +52,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "geretou-mobile-app"
+        "projectId": "6a5bd6e6-7754-4b3e-86e8-e6335a935c85"
       }
-    }
+    },
+    "owner": "krsidoine"
   }
 }

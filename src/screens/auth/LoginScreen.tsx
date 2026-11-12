@@ -6,10 +6,10 @@
 
 import React, { useState } from 'react';
 import { SafeAreaView, ScrollView, View, Text, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
-import { ArrowLeft, Wallet, ShieldCheck, CloudDownload, CircleCheck, TriangleAlert, CloudOff, ArrowRight, FolderLock } from 'lucide-react-native';
+import { ArrowLeft, Wallet, ShieldCheck, CloudDownload, CircleCheck, TriangleAlert, CloudOff, ArrowRight, FolderLock, Wrench } from 'lucide-react-native';
 import { useGoogleSignIn } from '../../hooks/useGoogleSignIn';
 import { GoogleSession } from '../../services/google/googleSession';
-import { fetchRemoteBackup } from '../../services/backup/syncService';
+import { fetchRemoteBackup, IS_SYNC_UNDER_MAINTENANCE } from '../../services/backup/syncService';
 import { BackupFile, summarizeBackup } from '../../services/backup/backupFormat';
 import { formatSyncDate } from '../settings/BackupScreen';
 import { colors, radii, spacing, typography } from '../../theme/tokens';
@@ -75,7 +75,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onBack, onRestore, onC
           </Text>
         </View>
 
-        {!configured ? (
+        {IS_SYNC_UNDER_MAINTENANCE ? (
+          <View style={[styles.notice, styles.noticeWarn]}>
+            <Wrench size={18} color={colors.accent.warning} />
+            <Text style={styles.noticeText}>
+              Le service de synchronisation et de restauration Google Drive est actuellement en maintenance. Si vous commencez sur cet appareil, créez votre coffre local ci-dessous.
+            </Text>
+          </View>
+        ) : !configured ? (
           <View style={[styles.notice, styles.noticeWarn]}>
             <TriangleAlert size={18} color={colors.accent.warning} />
             <Text style={styles.noticeText}>La connexion Google n'est pas encore disponible sur cet appareil.</Text>
@@ -114,9 +121,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onBack, onRestore, onC
         ) : (
           <Pressable
             onPress={connect}
-            disabled={busy || !configured}
+            disabled={IS_SYNC_UNDER_MAINTENANCE || busy || !configured}
             accessibilityRole="button"
-            style={({ pressed }) => [styles.googleBtn, (pressed || !configured) && { opacity: 0.6 }]}
+            style={({ pressed }) => [
+              styles.googleBtn,
+              (pressed || !configured || IS_SYNC_UNDER_MAINTENANCE) && { opacity: 0.6 },
+            ]}
           >
             {busy ? (
               <ActivityIndicator color={colors.text.primary} />
@@ -125,7 +135,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onBack, onRestore, onC
                 <Text style={styles.gMarkText}>G</Text>
               </View>
             )}
-            <Text style={styles.googleBtnText}>{busy ? state.label : 'Continuer avec Google'}</Text>
+            <Text style={styles.googleBtnText}>
+              {IS_SYNC_UNDER_MAINTENANCE
+                ? 'Restauration en maintenance'
+                : busy
+                ? state.label
+                : 'Continuer avec Google'}
+            </Text>
           </Pressable>
         )}
 

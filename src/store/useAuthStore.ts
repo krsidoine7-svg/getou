@@ -36,6 +36,9 @@ interface AuthState {
   /** Ouvre la session après une restauration réussie (le PIN vient d'être choisi). */
   completeRestore: (enableBiometrics: boolean) => Promise<void>;
   unlockWithBiometrics: () => Promise<boolean>;
+  changePin: (oldPin: string, newPin: string) => Promise<{ success: boolean; error?: string }>;
+  toggleBiometrics: (enable: boolean) => Promise<{ success: boolean; error?: string }>;
+  updateDisplayName: (displayName: string) => Promise<boolean>;
   lockSession: () => void;
   recordActivity: () => void;
   checkTimeout: () => boolean; // Verrouille si inactif depuis > 3 minutes (180 000 ms)
@@ -163,6 +166,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return true;
     }
     return false;
+  },
+
+  changePin: async (oldPin, newPin) => {
+    return await AuthService.changePin(oldPin, newPin);
+  },
+
+  toggleBiometrics: async (enable) => {
+    const res = await AuthService.toggleBiometrics(enable);
+    if (res.success) {
+      const user = await AuthService.getActiveUser();
+      if (user) set({ currentUser: user });
+    }
+    return res;
+  },
+
+  updateDisplayName: async (displayName) => {
+    try {
+      const updated = await AuthService.updateDisplayName(displayName);
+      set({ currentUser: updated });
+      return true;
+    } catch {
+      return false;
+    }
   },
 
   lockSession: () => {

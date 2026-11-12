@@ -20,15 +20,22 @@ import {
 import { ModuleScreen, useNavStore } from '../../store/useNavStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { userLabel } from '../../services/auth/identity';
+import { IS_SYNC_UNDER_MAINTENANCE } from '../../services/backup/syncService';
 import { colors, radii, spacing, typography } from '../../theme/tokens';
 
-export const MODULES: { key: ModuleScreen; title: string; subtitle: string; Icon: typeof Target }[] = [
+export const MODULES: { key: ModuleScreen; title: string; subtitle: string; Icon: typeof Target; badge?: string }[] = [
   { key: 'DEBTS', title: 'Dettes & Créances', subtitle: 'Qui vous doit, ce que vous devez', Icon: HandCoins },
   { key: 'PROJECTS', title: "Projets & Épargne", subtitle: "Objectifs d'achat et coffres dédiés", Icon: Target },
   { key: 'AGENDA', title: 'Agenda & Échéances', subtitle: 'Factures et paiements à venir', Icon: CalendarDays },
   { key: 'ANALYTICS', title: 'Analyses', subtitle: 'Graphiques et bilan du mois', Icon: ChartColumn },
   { key: 'NOTIFICATIONS', title: 'Notifications', subtitle: "Centre d'alertes et historique", Icon: Bell },
-  { key: 'BACKUP', title: 'Sauvegarde Google Drive', subtitle: 'Synchroniser et restaurer vos données', Icon: CloudUpload },
+  {
+    key: 'BACKUP',
+    title: 'Sauvegarde Google Drive',
+    subtitle: IS_SYNC_UNDER_MAINTENANCE ? 'En maintenance · Données locales sécurisées' : 'Synchroniser et restaurer vos données',
+    Icon: CloudUpload,
+    badge: IS_SYNC_UNDER_MAINTENANCE ? 'Maintenance' : undefined,
+  },
   { key: 'SETTINGS', title: 'Sécurité & Réglages', subtitle: 'Code PIN, biométrie, sauvegarde', Icon: ShieldCheck },
   { key: 'TRASH', title: 'Corbeille', subtitle: 'Restaurer les éléments supprimés', Icon: Trash2 },
 ];
@@ -44,7 +51,7 @@ export const MoreScreen: React.FC = () => {
         <Text style={styles.subtitle}>{userLabel(currentUser?.display_name, currentUser?.email) || 'Coffre local · sans compte'}</Text>
 
         <View style={styles.list}>
-          {MODULES.map(({ key, title, subtitle, Icon }, i) => (
+          {MODULES.map(({ key, title, subtitle, Icon, badge }, i) => (
             <Pressable
               key={key}
               onPress={() => navigate(key)}
@@ -60,7 +67,14 @@ export const MoreScreen: React.FC = () => {
                 <Icon size={20} color={colors.primary.DEFAULT} />
               </View>
               <View style={styles.rowText}>
-                <Text style={styles.rowTitle}>{title}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={styles.rowTitle}>{title}</Text>
+                  {badge ? (
+                    <View style={styles.badgePill}>
+                      <Text style={styles.badgePillText}>{badge}</Text>
+                    </View>
+                  ) : null}
+                </View>
                 <Text style={styles.rowSubtitle}>{subtitle}</Text>
               </View>
               <ChevronRight size={18} color={colors.text.muted} />
@@ -118,6 +132,20 @@ const styles = StyleSheet.create({
   },
   rowText: { flex: 1 },
   rowTitle: { fontSize: typography.sizes.body, fontWeight: typography.weights.semibold, color: colors.text.primary },
+  badgePill: {
+    backgroundColor: colors.accent.warningBg,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: radii.full,
+    borderWidth: 1,
+    borderColor: colors.accent.warningBorder,
+  },
+  badgePillText: {
+    fontSize: 10,
+    fontWeight: typography.weights.bold,
+    color: colors.accent.warning,
+    letterSpacing: 0.3,
+  },
   rowSubtitle: { fontSize: typography.sizes.caption, color: colors.text.secondary, marginTop: 2 },
   lockBtn: {
     flexDirection: 'row',

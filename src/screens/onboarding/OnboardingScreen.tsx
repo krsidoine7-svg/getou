@@ -82,7 +82,7 @@ export const SLIDES: Slide[] = [
     features: [
       { Icon: ChartPie, title: 'Budgets en direct', text: 'Alerte dès 80 % du plafond atteint, même hors-ligne.', tint: colors.primary.DEFAULT, bg: colors.primary.container },
       { Icon: ShoppingCart, title: 'Liste de courses automatique', text: 'Les produits en stock bas s’y ajoutent tout seuls.', tint: colors.brands.orange, bg: colors.brands.orangeBg },
-      { Icon: CalendarClock, title: 'Rappels d’échéances', text: 'Loyer, factures, tontines : rappel 24 h avant.', tint: colors.brands.wave, bg: colors.brands.waveBg },
+      { Icon: CalendarClock, title: 'Rappels d’échéances', text: 'Loyer, factures, abonnements : rappel 24 h avant.', tint: colors.brands.wave, bg: colors.brands.waveBg },
     ],
   },
 ];

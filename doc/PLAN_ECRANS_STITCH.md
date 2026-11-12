@@ -119,7 +119,7 @@ puis redéfinir le PIN. Mode sombre : reporté.
 | 26 | Agenda & Échéancier Financier | ✅ `AgendaScreen` |
 | 27 | Nouvelle Deadline & Récurrence | ✅ `DeadlineEditorModal` |
 | 28 | Alerte Échéance (24h avant) | ✅ `DeadlineAlertScreen` |
-- [x] 7.1 Table `deadlines` (type, date, heure, récurrence, jour d'ancrage, compte prévu, importance, rappel) + catégorie « Tontine & Cercle » ; incluse dans la sauvegarde Drive (sans l'id de notification)
+- [x] 7.1 Table `deadlines` (type, date, heure, récurrence, jour d'ancrage, compte prévu, importance, rappel) (la tontine a été retirée ensuite à la demande du client) ; incluse dans la sauvegarde Drive (sans l'id de notification)
 - [x] 7.2 `DeadlineEditorModal` : montant, intitulé, type, raccourcis de date (Demain, Dans 3 j, Fin de mois, Le 5 prochain), heure, rappel (jour J / veille / 3 j avant), récurrence avec règle lisible, compte prévu, importance
 - [x] 7.3 `AgendaScreen` : semaine avec points, total sous 7 jours, filtres par type, sections En retard / Urgent (48 h) / À venir
 - [x] 7.4 Rappel local programmé (`expo-notifications`), annulé / reprogrammé à chaque modification, règlement ou report — **à tester sur téléphone** (non disponible dans le navigateur)
@@ -140,39 +140,45 @@ puis redéfinir le PIN. Mode sombre : reporté.
 > Non repris : modes sonores (discret / vibreur), bilan quotidien à 20 h, alertes de stocks (étape 10).
 
 ## Étape 9 — Dettes & Projets (3 écrans)
-| 23 | Dettes, Créances & Engagements | ⬜ |
-| 24 | Projets & Épargne Dédiée | ⬜ |
-| 25 | Projets d'Achat & Épargne Dédiée | ⬜ (à fusionner avec 24 ?) |
-- [ ] 9.1 Liste dettes / créances + balance nette
-- [ ] 9.2 Ajouter une dette / créance
-- [ ] 9.3 Remboursement partiel
-- [ ] 9.4 Relance WhatsApp / SMS pré-remplie
-- [ ] 9.5 Liste des projets + progression
-- [ ] 9.6 Créer un projet + versement vers le coffre
-- [ ] 9.7 Recommandation de versement périodique
+| 23 | Dettes, Créances & Engagements | ✅ `DebtsScreen` |
+| 24 | Projets & Épargne Dédiée | ✅ `ProjectsScreen` |
+| 25 | Projets d'Achat & Épargne Dédiée | ✅ fusionné avec 24 |
+- [x] 9.1 `DebtsScreen` : solde net, créances / dettes / soldées, progression, échéance (urgent ≤ 5 j, en retard)
+- [x] 9.2 Nouvel engagement (`DebtEditorModal`) : créance ou dette, téléphone, motif, échéance, compte de sortie / d'arrivée ou « déjà existant »
+- [x] 9.3 Encaissement / versement partiel (`MoneyActionModal`), dépassement du reste dû refusé, « sans compte suivi » possible
+- [x] 9.4 Relance WhatsApp / SMS avec message prérempli (numéro ivoirien normalisé)
+- [x] 9.5 `ProjectsScreen` (les 2 maquettes projets réunies) : épargne dédiée totale, onglets, progression, coffre, date cible
+- [x] 9.6 Créer un projet (`ProjectEditorModal`) avec coffre dédié ou existant ; alimenter / retirer = virements neutres ; objectif atteint automatique ; abandon
+- [x] 9.7 Conseil d'épargne (montant par semaine / par mois) + « Verser maintenant »
+- Règle comptable : prêter, emprunter, rembourser ou épargner n'est ni une dépense ni un revenu (transactions TRANSFER, provenance DEBT_IN / DEBT_OUT). Tests : `debtCore` + `projectCore` (6), `debtRepo` + `projectRepo` sur SQLite (5)
+
+> Non repris : onglet « Avances », historique de cercle, prélèvement automatique, rappel hebdo d'épargne.
 
 ## Étape 10 — Stocks (1 écran)
-| 31 | Stocks Domestiques & Courses | ⬜ |
-- [ ] 10.1 Liste des stocks + statut OK / bas / rupture
-- [ ] 10.2 Stepper − / + persistant
-- [ ] 10.3 Ajouter un produit
-- [ ] 10.4 Onglet liste de courses auto + total estimé
-- [ ] 10.5 Réapprovisionner → dépense + remise en stock
+| 31 | Stocks Domestiques & Courses | ✅ `StocksScreen` |
+- [x] 10.1 Liste des stocks + statut OK / bas / rupture (`stockCore.ts`, jauges de niveau, filtres par statut et catégorie)
+- [x] 10.2 Stepper − / + persistant (`adjustQuantity`, pas adapté par unité : 0,5 pour kg/L, 1 pour morceaux/boîtes)
+- [x] 10.3 Ajouter et modifier un produit (`StockEditorModal`, seuil d'alerte, cible, prix habituel)
+- [x] 10.4 Onglet liste de courses auto + total estimé (`shoppingList`, `basketTotal`, badge du nombre de produits à acheter)
+- [x] 10.5 Réapprovisionner → dépense + remise en stock (`RestockModal`, `restockBasket`, débit de compte, répartition comptable exacte Alimentation/Maison dans `transactions`)
+- Tests : `stockCore.test.mjs` (8 tests) et `stockRepo.test.mjs` (4 tests sur SQLite)
 
 ## Étape 11 — Analyses (1 écran)
-| 22 | Analyses & Graphiques Financiers | ⬜ |
-- [ ] 11.1 Agrégats 7 j / 30 j (service + test)
-- [ ] 11.2 Graphique barres (react-native-svg)
-- [ ] 11.3 Donut par catégorie
-- [ ] 11.4 Diagnostic textuel du mois
+| 22 | Analyses & Graphiques Financiers | ✅ `AnalyticsScreen` |
+- [x] 11.1 Agrégats 7 j / 30 j / 3 mois / année (`analyticsCore.ts`, calculs purs, exclusion des virements neutres, timeline journalière et mensuelle)
+- [x] 11.2 Graphique barres (`BarChart.tsx`, react-native-svg, repère de moyenne journalière, détection des pics de dépenses)
+- [x] 11.3 Donut par catégorie (`DonutChart.tsx`, react-native-svg, tranches chromatiques, montant central et liste détaillée avec pourcentages)
+- [x] 11.4 Diagnostic textuel du mois (`generateFinancialDiagnostic`, IA locale SQLite évaluant l'épargne nette, les plafonds de budget et les conseils d'action)
+- Tests : `analyticsCore.test.mjs` (3 tests) et `analyticsRepo.test.mjs` (1 test d'intégration sur SQLite)
 
 ## Étape 12 — Réglages, données & corbeille (4 écrans)
-| 16 | Réglages Sécurité & Biométrie | ⬜ |
-| 8 | Connexion & Synchronisation Google | ⬜ |
-| 32 | Synchronisation & Sauvegarde Google Drive | ⬜ |
-| 33 | Corbeille & Restauration | ⬜ |
-- [ ] 12.1 Réglages sécurité : changer PIN, biométrie on/off, délai de verrouillage
-- [ ] 12.2 Suppression douce (`deleted_at`) des transactions
-- [ ] 12.3 Corbeille : lister, restaurer, vider
-- [ ] 12.4 Sauvegarde locale : export JSON de la base
-- [ ] 12.5 Google (connexion + Drive) — nécessite un ID client OAuth Google, à décider
+| 16 | Réglages Sécurité & Biométrie | ✅ `SettingsScreen` |
+| 8 | Connexion & Synchronisation Google | ✅ `LoginScreen` (étape 3) |
+| 32 | Synchronisation & Sauvegarde Google Drive | ✅ `BackupScreen` (étape 3) |
+| 33 | Corbeille & Restauration | ✅ `TrashScreen` |
+- [x] 12.1 Réglages sécurité : changer PIN (`ChangePinModal`), biométrie on/off avec test capteur, modification nom/pseudo, verrouillage immédiat
+- [x] 12.2 Suppression douce (`deleted_at`, `is_deleted = 1`) des transactions avec réajustement inverse du solde
+- [x] 12.3 Corbeille : lister, restaurer (redébit/recrédit fidèle avec contrôle de solde), suppression définitive et vider la corbeille
+- [x] 12.4 Sauvegarde locale : export JSON de la base dans `backupFormat.ts` et `BackupScreen`
+- [x] 12.5 Google (connexion + Drive) : OAuth Google Drive `appDataFolder` fonctionnel et testé
+- Tests : `trashRepo.test.mjs` (4 tests d'intégration SQLite) et suite complète de 129 tests passants

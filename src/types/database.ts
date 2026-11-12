@@ -56,7 +56,8 @@ export interface Transaction {
   type: TransactionType;
   nature: TransactionNature;
   urgency: TransactionUrgency;
-  provenance?: IncomeProvenance | null;
+  /** Provenance d'un revenu, ou DEBT_IN / DEBT_OUT pour les mouvements liés aux dettes & créances. */
+  provenance?: IncomeProvenance | 'DEBT_IN' | 'DEBT_OUT' | null;
   /** Icône de la catégorie (jointure, lecture seule). */
   category_icon?: string | null;
   /** Nom de la catégorie (jointure, lecture seule). */

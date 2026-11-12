@@ -19,11 +19,14 @@ import {
   ArrowUpRight,
   ArrowDownLeft,
   ArrowLeftRight,
+  HandCoins,
   ReceiptText,
   ChevronRight,
   CircleDashed,
   Gauge,
   Target,
+  Settings,
+  Wrench,
 } from 'lucide-react-native';
 import { CategoryIcon, PROVENANCE_ICONS } from '../../components/common/AppIcons';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -37,7 +40,7 @@ import { describeTransaction } from '../../services/transaction/labels';
 import { ACCOUNT_TYPE_LABELS, groupAccountsForCards, relativeDate } from '../../services/dashboard/dashboardData';
 import { getOpenDebtBalances } from '../../services/debt/debtService';
 import { GoogleSession, isTokenValid, loadSession } from '../../services/google/googleSession';
-import { SyncInfo, getLastSync, syncNow } from '../../services/backup/syncService';
+import { SyncInfo, getLastSync, syncNow, IS_SYNC_UNDER_MAINTENANCE } from '../../services/backup/syncService';
 import { formatSyncDate } from '../settings/BackupScreen';
 import { DeleteAccountModal } from '../settings/DeleteAccountModal';
 import { TransferModal } from '../../components/account/TransferModal';
@@ -59,10 +62,11 @@ function splitAmount(amount: number): { value: string; unit: string } {
 
 /** Icône d'une transaction : sa catégorie, sinon sa provenance, sinon le sens du flux. */
 const TxIcon: React.FC<{ tx: Transaction; color: string }> = ({ tx, color }) => {
+  if (tx.provenance === 'DEBT_OUT' || tx.provenance === 'DEBT_IN') return <HandCoins size={20} color={color} />;
   if (tx.type === 'TRANSFER') return <ArrowLeftRight size={20} color={color} />;
   if (tx.category_icon) return <CategoryIcon name={tx.category_icon} size={20} color={color} />;
-  if (tx.type !== 'EXPENSE' && tx.provenance) {
-    const ProvIcon = PROVENANCE_ICONS[tx.provenance];
+  if (tx.type === 'INCOME' && tx.provenance) {
+    const ProvIcon = PROVENANCE_ICONS[tx.provenance as keyof typeof PROVENANCE_ICONS];
     return <ProvIcon size={20} color={color} />;
   }
   return tx.type === 'EXPENSE' ? <ArrowUpRight size={20} color={color} /> : <ArrowDownLeft size={20} color={color} />;
@@ -113,6 +117,14 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onOpenNewExpen
 
   const quickSync = async () => {
     recordActivity();
+    if (IS_SYNC_UNDER_MAINTENANCE) {
+      showToast({
+        kind: 'info',
+        title: 'Maintenance en cours',
+        message: 'La synchronisation Google Drive est temporairement suspendue pour maintenance.',
+      });
+      return;
+    }
     // Session absente ou expirée : l'écran Sauvegarde gère la (re)connexion Google.
     if (!session || !isTokenValid(session)) return navigate('BACKUP');
     try {
@@ -148,10 +160,21 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onOpenNewExpen
         </View>
         <Text style={styles.statusMuted}>Stockage local</Text>
         <Pressable onPress={() => navigate('BACKUP')} accessibilityRole="button" style={styles.statusSync}>
-          <RefreshCw size={12} color={colors.primary.DEFAULT} />
-          <Text style={styles.statusSyncText}>
-            {lastSync ? `Drive : ${formatSyncDate(lastSync.syncedAt).replace("Aujourd'hui, ", '')}` : 'Drive : jamais'}
-          </Text>
+          {IS_SYNC_UNDER_MAINTENANCE ? (
+            <>
+              <Wrench size={12} color={colors.accent.warning} />
+              <Text style={[styles.statusSyncText, { color: colors.accent.warning }]}>
+                Drive : Maintenance
+              </Text>
+            </>
+          ) : (
+            <>
+              <RefreshCw size={12} color={colors.primary.DEFAULT} />
+              <Text style={styles.statusSyncText}>
+                {lastSync ? `Drive : ${formatSyncDate(lastSync.syncedAt).replace("Aujourd'hui, ", '')}` : 'Drive : jamais'}
+              </Text>
+            </>
+          )}
         </Pressable>
       </View>
 
@@ -160,15 +183,25 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onOpenNewExpen
         refreshControl={<RefreshControl refreshing={isWalletLoading || isTxLoading} onRefresh={onRefresh} />}
         onTouchStart={recordActivity}
       >
-        {/* En-tête */}
+        {/* En-tête avec profil cliquable et raccourci Réglages */}
         <View style={styles.header}>
-          <View style={styles.avatar}>
-            <UserRound size={22} color={colors.primary.DEFAULT} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.hello} numberOfLines={1}>Bonjour{firstName ? ` ${firstName}` : ''}</Text>
-            <Text style={styles.helloSub}>Tableau de bord familial</Text>
-          </View>
+          <Pressable
+            onPress={() => navigate('SETTINGS')}
+            accessibilityRole="button"
+            accessibilityLabel="Mon profil et réglages"
+            style={({ pressed }) => [styles.profileHeaderBtn, pressed && { opacity: 0.7 }]}
+          >
+            <View style={styles.avatar}>
+              <UserRound size={22} color={colors.primary.DEFAULT} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.hello} numberOfLines={1}>Bonjour{firstName ? ` ${firstName}` : ''}</Text>
+              <Text style={styles.helloSub}>Tableau de bord familial</Text>
+            </View>
+          </Pressable>
+          <Pressable onPress={() => navigate('SETTINGS')} hitSlop={8} accessibilityRole="button" accessibilityLabel="Réglages" style={styles.iconBtn}>
+            <Settings size={20} color={colors.text.primary} />
+          </Pressable>
           <Pressable onPress={() => navigate('NOTIFICATIONS')} hitSlop={8} accessibilityRole="button" accessibilityLabel={unread > 0 ? `Notifications, ${unread} non lues` : "Notifications"} style={styles.iconBtn}>
             <Bell size={20} color={colors.text.primary} />
             {unread > 0 ? (
@@ -393,7 +426,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onOpenNewExpen
                   </View>
                   <View style={{ alignItems: 'flex-end', maxWidth: '42%' }}>
                     <Text style={[styles.txAmount, { color }]} numberOfLines={1}>
-                      {isTransfer ? '' : isExp ? '-' : '+'}{formatFCFA(tx.amount)}
+                      {tx.provenance === 'DEBT_OUT' ? '-' : tx.provenance === 'DEBT_IN' ? '+' : isTransfer ? '' : isExp ? '-' : '+'}
+                      {formatFCFA(tx.amount)}
                     </Text>
                     {kind ? <Text style={styles.txKind} numberOfLines={1}>{kind}</Text> : null}
                   </View>
@@ -456,6 +490,12 @@ const styles = StyleSheet.create({
   statusSyncText: { fontSize: typography.sizes.caption, fontWeight: typography.weights.semibold, color: colors.primary.dark },
   content: { padding: spacing.base, paddingBottom: 96, gap: spacing.md },
   header: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  profileHeaderBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
   avatar: {
     width: 44,
     height: 44,

@@ -15,13 +15,15 @@ import {
   FolderLock,
   History,
   HardDrive,
+  Wrench,
+  ShieldCheck,
 } from 'lucide-react-native';
 import { useNavStore } from '../../store/useNavStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useAlertStore } from '../../store/useAlertStore';
 import { useGoogleSignIn } from '../../hooks/useGoogleSignIn';
 import { GoogleSession, clearSession, isTokenValid, loadSession } from '../../services/google/googleSession';
-import { SyncInfo, fetchRemoteBackup, getLastSync, restoreBackup, syncNow } from '../../services/backup/syncService';
+import { SyncInfo, fetchRemoteBackup, getLastSync, restoreBackup, syncNow, IS_SYNC_UNDER_MAINTENANCE } from '../../services/backup/syncService';
 import { BackupFile, summarizeBackup } from '../../services/backup/backupFormat';
 import { DriveAuthError } from '../../services/backup/driveClient';
 import { getDatabase } from '../../services/db/database';
@@ -83,6 +85,10 @@ export const BackupScreen: React.FC = () => {
   };
 
   const connect = async () => {
+    if (IS_SYNC_UNDER_MAINTENANCE) {
+      setMessage({ kind: 'error', text: 'Le service de synchronisation Google Drive est actuellement en maintenance.' });
+      return;
+    }
     recordActivity();
     setMessage(null);
     try {
@@ -102,6 +108,10 @@ export const BackupScreen: React.FC = () => {
   };
 
   const sync = async () => {
+    if (IS_SYNC_UNDER_MAINTENANCE) {
+      setMessage({ kind: 'error', text: 'Le service de synchronisation Google Drive est actuellement en maintenance.' });
+      return;
+    }
     recordActivity();
     setMessage(null);
     try {
@@ -125,6 +135,10 @@ export const BackupScreen: React.FC = () => {
   };
 
   const checkRemote = async () => {
+    if (IS_SYNC_UNDER_MAINTENANCE) {
+      setMessage({ kind: 'error', text: 'Le service de synchronisation Google Drive est actuellement en maintenance.' });
+      return;
+    }
     recordActivity();
     setMessage(null);
     try {
@@ -187,6 +201,31 @@ export const BackupScreen: React.FC = () => {
         <Text style={styles.title}>Sauvegarde & Synchronisation</Text>
         <Text style={styles.subtitle}>Copie de vos données dans votre Google Drive, récupérable sur un autre téléphone.</Text>
 
+        {IS_SYNC_UNDER_MAINTENANCE ? (
+          <View style={styles.maintenanceCard}>
+            <View style={styles.maintenanceHeader}>
+              <View style={styles.maintenanceIconBox}>
+                <Wrench size={22} color={colors.accent.warning} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <View style={styles.maintenanceBadge}>
+                  <Text style={styles.maintenanceBadgeText}>SERVICE EN MAINTENANCE</Text>
+                </View>
+                <Text style={styles.maintenanceTitle}>Synchronisation Google Drive suspendue</Text>
+              </View>
+            </View>
+            <Text style={styles.maintenanceText}>
+              Le service de synchronisation distante fait l’objet d’une maintenance technique préventive. L’envoi et la restauration de sauvegardes cloud sont temporairement suspendus.
+            </Text>
+            <View style={styles.maintenanceFooter}>
+              <ShieldCheck size={16} color={colors.primary.DEFAULT} />
+              <Text style={styles.maintenanceFooterText}>
+                Vos données locales restent 100 % intactes, souveraines et sécurisées sur cet appareil.
+              </Text>
+            </View>
+          </View>
+        ) : null}
+
         {!configured ? (
           <View style={[styles.notice, styles.noticeWarn]}>
             <TriangleAlert size={18} color={colors.accent.warning} />
@@ -206,12 +245,22 @@ export const BackupScreen: React.FC = () => {
             </Text>
             <Pressable
               onPress={connect}
-              disabled={busy !== null}
+              disabled={IS_SYNC_UNDER_MAINTENANCE || busy !== null}
               accessibilityRole="button"
-              style={({ pressed }) => [styles.googleBtn, pressed && { opacity: 0.8 }]}
+              style={({ pressed }) => [
+                styles.googleBtn,
+                IS_SYNC_UNDER_MAINTENANCE && styles.disabledBtn,
+                pressed && { opacity: 0.8 },
+              ]}
             >
-              {busy === 'signin' ? <ActivityIndicator color={colors.text.primary} /> : <GoogleMark />}
-              <Text style={styles.googleBtnText}>Continuer avec Google</Text>
+              {busy === 'signin' ? (
+                <ActivityIndicator color={colors.text.primary} />
+              ) : (
+                <GoogleMark />
+              )}
+              <Text style={styles.googleBtnText}>
+                {IS_SYNC_UNDER_MAINTENANCE ? 'Connexion en maintenance' : 'Continuer avec Google'}
+              </Text>
             </Pressable>
           </View>
         ) : (
@@ -244,9 +293,13 @@ export const BackupScreen: React.FC = () => {
 
             <Pressable
               onPress={sync}
-              disabled={busy !== null}
+              disabled={IS_SYNC_UNDER_MAINTENANCE || busy !== null}
               accessibilityRole="button"
-              style={({ pressed }) => [styles.syncBtn, (pressed || busy !== null) && { opacity: 0.85 }]}
+              style={({ pressed }) => [
+                styles.syncBtn,
+                IS_SYNC_UNDER_MAINTENANCE && styles.disabledBtn,
+                (pressed || busy !== null) && { opacity: 0.85 },
+              ]}
             >
               <View style={styles.syncIcon}>
                 {busy === 'sync' || busy === 'signin' ? (
@@ -256,8 +309,18 @@ export const BackupScreen: React.FC = () => {
                 )}
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.syncTitle}>{busy === 'sync' ? 'Envoi en cours…' : 'Synchroniser maintenant'}</Text>
-                <Text style={styles.syncText}>Envoie l'état actuel de vos comptes sur Google Drive</Text>
+                <Text style={styles.syncTitle}>
+                  {IS_SYNC_UNDER_MAINTENANCE
+                    ? 'Synchronisation en pause'
+                    : busy === 'sync'
+                    ? 'Envoi en cours…'
+                    : 'Synchroniser maintenant'}
+                </Text>
+                <Text style={styles.syncText}>
+                  {IS_SYNC_UNDER_MAINTENANCE
+                    ? 'Service temporairement suspendu pour maintenance'
+                    : "Envoie l'état actuel de vos comptes sur Google Drive"}
+                </Text>
               </View>
             </Pressable>
           </>
@@ -313,12 +376,22 @@ export const BackupScreen: React.FC = () => {
           ) : (
             <Pressable
               onPress={checkRemote}
-              disabled={busy !== null}
+              disabled={IS_SYNC_UNDER_MAINTENANCE || busy !== null}
               accessibilityRole="button"
-              style={({ pressed }) => [styles.secondaryBtn, pressed && { opacity: 0.8 }]}
+              style={({ pressed }) => [
+                styles.secondaryBtn,
+                IS_SYNC_UNDER_MAINTENANCE && styles.disabledBtn,
+                pressed && { opacity: 0.8 },
+              ]}
             >
-              {busy === 'check' ? <ActivityIndicator color={colors.text.primary} /> : <CloudDownload size={18} color={colors.text.primary} />}
-              <Text style={styles.secondaryText}>Restaurer depuis Google Drive</Text>
+              {busy === 'check' ? (
+                <ActivityIndicator color={colors.text.primary} />
+              ) : (
+                <CloudDownload size={18} color={colors.text.primary} />
+              )}
+              <Text style={styles.secondaryText}>
+                {IS_SYNC_UNDER_MAINTENANCE ? 'Restauration en maintenance' : 'Restaurer depuis Google Drive'}
+              </Text>
             </Pressable>
           )
         ) : null}
@@ -450,4 +523,67 @@ const styles = StyleSheet.create({
   secondaryText: { fontSize: typography.sizes.body, fontWeight: typography.weights.semibold, color: colors.text.primary },
   logout: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm, paddingVertical: spacing.md },
   logoutText: { color: colors.accent.danger, fontWeight: typography.weights.semibold },
+  maintenanceCard: {
+    backgroundColor: colors.surface.card,
+    borderRadius: radii.xl,
+    borderWidth: 1,
+    borderColor: colors.accent.warningBorder,
+    padding: spacing.base,
+    gap: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+  maintenanceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  maintenanceIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: radii.md,
+    backgroundColor: colors.accent.warningBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  maintenanceBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: colors.accent.warningBg,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: radii.full,
+    marginBottom: 4,
+  },
+  maintenanceBadgeText: {
+    fontSize: 10,
+    fontWeight: typography.weights.bold,
+    color: colors.accent.warning,
+    letterSpacing: 0.5,
+  },
+  maintenanceTitle: {
+    fontSize: typography.sizes.body,
+    fontWeight: typography.weights.bold,
+    color: colors.text.primary,
+  },
+  maintenanceText: {
+    fontSize: typography.sizes.bodySm,
+    color: colors.text.secondary,
+    lineHeight: 18,
+  },
+  maintenanceFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingTop: spacing.xs,
+    borderTopWidth: 1,
+    borderTopColor: colors.surface.border,
+  },
+  maintenanceFooterText: {
+    flex: 1,
+    fontSize: typography.sizes.caption,
+    color: colors.primary.DEFAULT,
+    fontWeight: typography.weights.medium,
+  },
+  disabledBtn: {
+    opacity: 0.55,
+  },
 });

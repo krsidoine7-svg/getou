@@ -11,6 +11,19 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 const LAST_SYNC_KEY = 'geretou_last_sync';
 
+/**
+ * Drapeau global de maintenance pour la synchronisation Cloud Google Drive.
+ * Mettre à `false` pour réactiver la synchronisation immédiatement.
+ */
+export const IS_SYNC_UNDER_MAINTENANCE = true;
+
+export class SyncMaintenanceError extends Error {
+  constructor(message = 'Le service de synchronisation Google Drive est actuellement en maintenance.') {
+    super(message);
+    this.name = 'SyncMaintenanceError';
+  }
+}
+
 export interface SyncInfo {
   /** Date ISO de la dernière sauvegarde réussie depuis cet appareil. */
   syncedAt: string;
@@ -34,6 +47,10 @@ export async function getLastSync(): Promise<SyncInfo | null> {
 
 /** Exporte la base et l'envoie sur Google Drive (remplace la sauvegarde précédente). */
 export async function syncNow(accessToken: string, email: string): Promise<SyncInfo> {
+  if (IS_SYNC_UNDER_MAINTENANCE) {
+    throw new SyncMaintenanceError();
+  }
+
   const db = await getDatabase();
   const backup = await exportDatabase(adapter(db));
   const content = JSON.stringify(backup);
@@ -45,6 +62,10 @@ export async function syncNow(accessToken: string, email: string): Promise<SyncI
 
 /** Cherche et télécharge la sauvegarde du compte ; null si aucune. */
 export async function fetchRemoteBackup(accessToken: string): Promise<{ file: DriveFileInfo; backup: BackupFile } | null> {
+  if (IS_SYNC_UNDER_MAINTENANCE) {
+    throw new SyncMaintenanceError();
+  }
+
   const client = new DriveClient(accessToken);
   const file = await client.findBackup();
   if (!file) return null;
