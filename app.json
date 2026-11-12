@@ -31,7 +31,13 @@
       ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "backgroundColor": "#F8FAFC",
+      "themeColor": "#0B4F3A",
+      "display": "standalone",
+      "name": "GERETOU",
+      "shortName": "GERETOU"
     },
     "plugins": [
       [
