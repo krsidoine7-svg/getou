@@ -3,17 +3,13 @@
  * SecureStore sur mobile, localStorage sur le web.
  */
 
-import { Platform } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from './secureStore';
 import { AlertPrefs, DEFAULT_ALERT_PREFS } from '../alerts/alertCore';
 
 const ONBOARDING_DONE_KEY = 'geretou_onboarding_done';
 
 export async function getItem(key: string): Promise<string | null> {
   try {
-    if (Platform.OS === 'web') {
-      return typeof localStorage !== 'undefined' ? localStorage.getItem(key) : null;
-    }
     return await SecureStore.getItemAsync(key);
   } catch {
     return null;
@@ -22,10 +18,6 @@ export async function getItem(key: string): Promise<string | null> {
 
 export async function setItem(key: string, value: string): Promise<void> {
   try {
-    if (Platform.OS === 'web') {
-      if (typeof localStorage !== 'undefined') localStorage.setItem(key, value);
-      return;
-    }
     await SecureStore.setItemAsync(key, value);
   } catch {
     // Préférence non critique : en cas d'échec l'onboarding sera simplement réaffiché.
@@ -34,10 +26,6 @@ export async function setItem(key: string, value: string): Promise<void> {
 
 export async function removeItem(key: string): Promise<void> {
   try {
-    if (Platform.OS === 'web') {
-      if (typeof localStorage !== 'undefined') localStorage.removeItem(key);
-      return;
-    }
     await SecureStore.deleteItemAsync(key);
   } catch {
     // Ignorer

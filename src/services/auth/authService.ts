@@ -3,8 +3,7 @@
  * Chiffrement local, hachage salé, SecureStore, Biométrie et Récupération Option B.
  */
 
-import { Platform } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from '../storage/secureStore';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as Crypto from 'expo-crypto';
 import {
@@ -34,27 +33,16 @@ export interface PinVerificationResult {
   lockedUntil?: number;
 }
 
-// Gestionnaire de stockage sécurisé avec compatibilité Web
+// Gestionnaire de stockage sécurisé (Keychain / Keystore sur mobile, localStorage sur web)
 async function secureStorageGet(key: string): Promise<string | null> {
-  if (Platform.OS === 'web') {
-    return typeof localStorage !== 'undefined' ? localStorage.getItem(key) : null;
-  }
   return await SecureStore.getItemAsync(key);
 }
 
 async function secureStorageSet(key: string, value: string): Promise<void> {
-  if (Platform.OS === 'web') {
-    if (typeof localStorage !== 'undefined') localStorage.setItem(key, value);
-    return;
-  }
   await SecureStore.setItemAsync(key, value);
 }
 
 async function secureStorageDelete(key: string): Promise<void> {
-  if (Platform.OS === 'web') {
-    if (typeof localStorage !== 'undefined') localStorage.removeItem(key);
-    return;
-  }
   await SecureStore.deleteItemAsync(key);
 }
 
