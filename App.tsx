@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { StatusBar, View, StyleSheet, AppState, AppStateStatus } from 'react-native';
+import { StatusBar, View, StyleSheet, AppState, AppStateStatus, Platform } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { initDatabase } from './src/services/db/database';
 import { useAuthStore } from './src/store/useAuthStore';
@@ -42,6 +42,12 @@ import { colors } from './src/theme/tokens';
 // Web : la fenêtre de connexion Google revient sur l'app ; ceci la referme et transmet le résultat.
 // Dans cette fenêtre, l'app ne doit rien démarrer (la base est déjà ouverte par l'onglet principal).
 const IS_AUTH_POPUP = WebBrowser.maybeCompleteAuthSession().type === 'success';
+
+/**
+ * Hauteur de la barre d'état Android pour éviter que le haut des écrans et les
+ * notifications ne soient tronqués derrière la caméra ou les icônes système (WiFi, horloge).
+ */
+const ANDROID_STATUS_BAR = Platform.OS === 'android' ? (StatusBar.currentHeight ?? 24) : 0;
 
 /** Durée minimale d'affichage du splash, pour éviter un simple flash à l'écran. */
 const MIN_SPLASH_MS = 900;
@@ -147,97 +153,116 @@ export default function App() {
   // Écran de démarrage : progression réelle de l'initialisation
   if (!boot.done) {
     return (
-      <>
+      <View style={styles.root}>
         <StatusBar barStyle="dark-content" />
-        <SplashScreen progress={boot.progress} status={boot.status} error={boot.error} />
-      </>
+        <View style={styles.screenContainer}>
+          <SplashScreen progress={boot.progress} status={boot.status} error={boot.error} />
+        </View>
+      </View>
     );
   }
 
   // Écran 1a : premier lancement => découverte (une seule fois)
   if (!hasUser && !onboardingDone) {
     return (
-      <>
+      <View style={styles.root}>
         <StatusBar barStyle="dark-content" />
-        <OnboardingScreen
-          onFinish={() => {
-            setAuthMode({ mode: 'register' });
-            setOnboardingDone(true);
-            markOnboardingDone();
-          }}
-          onLogin={() => {
-            setAuthMode({ mode: 'login' });
-            setOnboardingDone(true);
-            markOnboardingDone();
-          }}
-        />
-      </>
+        <View style={styles.screenContainer}>
+          <OnboardingScreen
+            onFinish={() => {
+              setAuthMode({ mode: 'register' });
+              setOnboardingDone(true);
+              markOnboardingDone();
+            }}
+            onLogin={() => {
+              setAuthMode({ mode: 'login' });
+              setOnboardingDone(true);
+              markOnboardingDone();
+            }}
+          />
+        </View>
+      </View>
     );
   }
 
   // Écran 1b : « J'ai déjà un coffre » => connexion Google + restauration
   if (!hasUser && authMode.mode === 'login') {
     return (
-      <>
+      <View style={styles.root}>
         <StatusBar barStyle="dark-content" />
-        <LoginFlow
-          onBack={() => setOnboardingDone(false)}
-          onCreateAccount={(email) => setAuthMode({ mode: 'register', email })}
-        />
-      </>
+        <View style={styles.screenContainer}>
+          <LoginFlow
+            onBack={() => setOnboardingDone(false)}
+            onCreateAccount={(email) => setAuthMode({ mode: 'register', email })}
+          />
+        </View>
+        <ToastHost />
+      </View>
     );
   }
 
   // Écran 1c : nouvel utilisateur => inscription
   if (!hasUser) {
     return (
-      <>
+      <View style={styles.root}>
         <StatusBar barStyle="dark-content" />
-        <RegistrationFlow
-          key={authMode.email ?? 'register'}
-          prefillEmail={authMode.email}
-          onBackToOnboarding={() => setOnboardingDone(false)}
-          onLogin={() => setAuthMode({ mode: 'login' })}
-        />
-      </>
+        <View style={styles.screenContainer}>
+          <RegistrationFlow
+            key={authMode.email ?? 'register'}
+            prefillEmail={authMode.email}
+            onBackToOnboarding={() => setOnboardingDone(false)}
+            onLogin={() => setAuthMode({ mode: 'login' })}
+          />
+        </View>
+        <ToastHost />
+      </View>
     );
   }
 
   // Écran 2 : Utilisateur existant mais session verrouillée => Écran PIN / Biométrie
   if (isLocked) {
     return (
-      <>
+      <View style={styles.root}>
         <StatusBar barStyle="dark-content" />
-        <LockScreen />
-      </>
+        <View style={styles.screenContainer}>
+          <LockScreen />
+        </View>
+        <ToastHost />
+      </View>
     );
   }
 
   // Écran 3 : Modal / Vue de Saisie de Dépense Express (MVP 1)
   if (currentView === 'NEW_EXPENSE') {
     return (
-      <>
+      <View style={styles.root}>
         <StatusBar barStyle="dark-content" />
-        <NouvelleDepenseScreen
-          onClose={reset}
-          onSwitchToIncome={() => replace('NEW_INCOME')}
-          onSuccess={reset}
-        />
-      </>
+        <View style={styles.screenContainer}>
+          <NouvelleDepenseScreen
+            onClose={reset}
+            onSwitchToIncome={() => replace('NEW_INCOME')}
+            onSuccess={reset}
+          />
+        </View>
+        <ToastHost />
+      </View>
     );
   }
 
   // Écran 4 : Modal / Vue de Saisie de Revenu & Règle Comptable (MVP 1)
   if (currentView === 'NEW_INCOME') {
     return (
-      <>
+      <View style={styles.root}>
         <StatusBar barStyle="dark-content" />
-        <NouveauRevenuScreen
-          onClose={reset}
-          onSwitchToExpense={() => replace('NEW_EXPENSE')}
-          onSuccess={reset}
-        />
-      </>
+        <View style={styles.screenContainer}>
+          <NouveauRevenuScreen
+            onClose={reset}
+            onSwitchToExpense={() => replace('NEW_EXPENSE')}
+            onSuccess={reset}
+          />
+        </View>
+        <ToastHost />
+      </View>
     );
   }
 
@@ -286,9 +311,9 @@ export default function App() {
   }
 
   return (
-    <View style={styles.shell}>
+    <View style={styles.root}>
       <StatusBar barStyle="dark-content" />
-      <View style={styles.shell}>{screen}</View>
+      <View style={styles.screenContainer}>{screen}</View>
       {activeTab ? <TabBar activeTab={activeTab} /> : null}
       <ToastHost />
     </View>
@@ -296,8 +321,13 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  shell: {
+  root: {
     flex: 1,
     backgroundColor: colors.surface.canvas,
+  },
+  screenContainer: {
+    flex: 1,
+    backgroundColor: colors.surface.canvas,
+    paddingTop: ANDROID_STATUS_BAR,
   },
 });

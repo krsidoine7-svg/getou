@@ -4,7 +4,20 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Modal, View, Text, TextInput, Pressable, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import {
+  Modal,
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
 import { X, Plus, TriangleAlert, Wallet, Lock, PiggyBank } from 'lucide-react-native';
 import { useWalletStore } from '../../store/useWalletStore';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -73,17 +86,22 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({ visible, onClo
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.backdrop}>
-        <View style={styles.sheet}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Nouveau compte</Text>
-            <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel="Fermer">
-              <X size={22} color={colors.text.primary} />
-            </Pressable>
-          </View>
+    <Modal visible={visible} animationType="slide" transparent statusBarTranslucent onRequestClose={onClose}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.backdrop}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.keyboardAvoid}
+          >
+            <View style={styles.sheet}>
+              <View style={styles.header}>
+                <Text style={styles.title}>Nouveau compte</Text>
+                <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel="Fermer">
+                  <X size={22} color={colors.text.primary} />
+                </Pressable>
+              </View>
 
-          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+              <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
             <Text style={styles.label}>Opérateur</Text>
             <View style={styles.wrap} accessibilityRole="radiogroup">
               {TYPES.map((t) => {
@@ -170,14 +188,17 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({ visible, onClo
             </Pressable>
           </View>
         </View>
-      </View>
-    </Modal>
+      </KeyboardAvoidingView>
+    </View>
+  </TouchableWithoutFeedback>
+</Modal>
   );
 };
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(15, 23, 42, 0.45)', justifyContent: 'flex-end' },
-  sheet: { maxHeight: '92%', backgroundColor: colors.surface.canvas, borderTopLeftRadius: 24, borderTopRightRadius: 24, overflow: 'hidden' },
+  keyboardAvoid: { width: '100%', justifyContent: 'flex-end' },
+  sheet: { maxHeight: '90%', backgroundColor: colors.surface.canvas, borderTopLeftRadius: 24, borderTopRightRadius: 24, overflow: 'hidden' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

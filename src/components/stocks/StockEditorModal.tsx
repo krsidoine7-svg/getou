@@ -12,6 +12,10 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import { X, TriangleAlert, Check, Plus, Minus } from 'lucide-react-native';
 import {
@@ -97,22 +101,27 @@ export const StockEditorModal: React.FC<Props> = ({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.backdrop}>
-        <View style={styles.sheet}>
-          <View style={styles.header}>
-            <Text style={styles.title}>
-              {stockToEdit ? 'Modifier le produit' : 'Nouveau produit en stock'}
-            </Text>
-            <Pressable
-              onPress={onClose}
-              hitSlop={10}
-              accessibilityRole="button"
-              accessibilityLabel="Fermer"
-            >
-              <X size={22} color={colors.text.primary} />
-            </Pressable>
-          </View>
+    <Modal visible={visible} animationType="slide" transparent statusBarTranslucent onRequestClose={onClose}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.backdrop}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.keyboardAvoid}
+          >
+            <View style={styles.sheet}>
+              <View style={styles.header}>
+                <Text style={styles.title}>
+                  {stockToEdit ? 'Modifier le produit' : 'Nouveau produit en stock'}
+                </Text>
+                <Pressable
+                  onPress={onClose}
+                  hitSlop={10}
+                  accessibilityRole="button"
+                  accessibilityLabel="Fermer"
+                >
+                  <X size={22} color={colors.text.primary} />
+                </Pressable>
+              </View>
 
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
             {/* Nom */}
@@ -308,8 +317,10 @@ export const StockEditorModal: React.FC<Props> = ({
             </Pressable>
           </View>
         </View>
-      </View>
-    </Modal>
+      </KeyboardAvoidingView>
+    </View>
+  </TouchableWithoutFeedback>
+</Modal>
   );
 };
 
@@ -319,8 +330,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15, 23, 42, 0.45)',
     justifyContent: 'flex-end',
   },
+  keyboardAvoid: {
+    width: '100%',
+    justifyContent: 'flex-end',
+  },
   sheet: {
-    maxHeight: '92%',
+    maxHeight: '90%',
     backgroundColor: colors.surface.canvas,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,

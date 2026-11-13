@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { Animated, Pressable, Text, View, StyleSheet } from 'react-native';
+import { Animated, Pressable, Text, View, StyleSheet, Platform, StatusBar } from 'react-native';
 import { CircleCheck, Info, TriangleAlert, X } from 'lucide-react-native';
 import { useToastStore, ToastKind } from '../../store/useToastStore';
 import { colors, radii, spacing, typography } from '../../theme/tokens';
@@ -14,6 +14,12 @@ const STYLE: Record<ToastKind, { bg: string; border: string; tint: string; Icon:
   info: { bg: colors.text.primary, border: colors.text.primary, tint: colors.text.inverted, Icon: Info },
   error: { bg: colors.accent.danger, border: colors.accent.danger, tint: colors.text.inverted, Icon: TriangleAlert },
 };
+
+const TOAST_TOP = Platform.OS === 'android'
+  ? (StatusBar.currentHeight ?? 24) + spacing.sm
+  : Platform.OS === 'ios'
+  ? 48
+  : spacing.base;
 
 export const ToastHost: React.FC = () => {
   const { toast, hide } = useToastStore();
@@ -53,7 +59,15 @@ export const ToastHost: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  host: { position: 'absolute', top: spacing.base, left: spacing.base, right: spacing.base, alignItems: 'center' },
+  host: {
+    position: 'absolute',
+    top: TOAST_TOP,
+    left: spacing.base,
+    right: spacing.base,
+    alignItems: 'center',
+    zIndex: 9999,
+    elevation: 9999,
+  },
   toast: {
     width: '100%',
     maxWidth: 480,

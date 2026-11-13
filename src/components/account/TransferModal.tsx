@@ -5,7 +5,20 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Modal, View, Text, TextInput, Pressable, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import {
+  Modal,
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
 import { X, ArrowLeftRight, TriangleAlert, Info } from 'lucide-react-native';
 import { AmountCard } from '../transaction/AmountCard';
 import { AccountSelector } from '../transaction/AccountSelector';
@@ -77,18 +90,23 @@ export const TransferModal: React.FC<TransferModalProps> = ({ visible, onClose, 
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.backdrop}>
-        <View style={styles.sheet}>
-          <View style={styles.header}>
-            <View style={styles.headerIcon}>
-              <ArrowLeftRight size={18} color={colors.primary.DEFAULT} />
-            </View>
-            <Text style={styles.title}>Virement interne</Text>
-            <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel="Fermer">
-              <X size={22} color={colors.text.primary} />
-            </Pressable>
-          </View>
+    <Modal visible={visible} animationType="slide" transparent statusBarTranslucent onRequestClose={onClose}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.backdrop}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.keyboardAvoid}
+          >
+            <View style={styles.sheet}>
+              <View style={styles.header}>
+                <View style={styles.headerIcon}>
+                  <ArrowLeftRight size={18} color={colors.primary.DEFAULT} />
+                </View>
+                <Text style={styles.title}>Virement interne</Text>
+                <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel="Fermer">
+                  <X size={22} color={colors.text.primary} />
+                </Pressable>
+              </View>
 
           {accounts.length < 2 ? (
             <View style={styles.info}>
@@ -163,15 +181,18 @@ export const TransferModal: React.FC<TransferModalProps> = ({ visible, onClose, 
             </Pressable>
           </View>
         </View>
-      </View>
-    </Modal>
+      </KeyboardAvoidingView>
+    </View>
+  </TouchableWithoutFeedback>
+</Modal>
   );
 };
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(15, 23, 42, 0.45)', justifyContent: 'flex-end' },
+  keyboardAvoid: { width: '100%', justifyContent: 'flex-end' },
   sheet: {
-    maxHeight: '92%',
+    maxHeight: '90%',
     backgroundColor: colors.surface.canvas,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,

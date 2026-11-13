@@ -3,7 +3,20 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Modal, View, Text, TextInput, Pressable, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import {
+  Modal,
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
 import { X, TriangleAlert, Check, ArrowDown, ArrowUp, UserRound, Phone, NotebookPen } from 'lucide-react-native';
 import { AmountCard } from '../transaction/AmountCard';
 import { useCommitmentStore } from '../../store/useCommitmentStore';
@@ -75,15 +88,20 @@ export const DebtEditorModal: React.FC<Props> = ({ visible, initialType = 'CREDI
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.backdrop}>
-        <View style={styles.sheet}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Nouvel engagement</Text>
-            <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel="Fermer">
-              <X size={22} color={colors.text.primary} />
-            </Pressable>
-          </View>
+    <Modal visible={visible} animationType="slide" transparent statusBarTranslucent onRequestClose={onClose}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.backdrop}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.keyboardAvoid}
+          >
+            <View style={styles.sheet}>
+              <View style={styles.header}>
+                <Text style={styles.title}>Nouvel engagement</Text>
+                <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel="Fermer">
+                  <X size={22} color={colors.text.primary} />
+                </Pressable>
+              </View>
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
             <View style={styles.segment} accessibilityRole="radiogroup">
               {[
@@ -157,14 +175,17 @@ export const DebtEditorModal: React.FC<Props> = ({ visible, initialType = 'CREDI
             </Pressable>
           </View>
         </View>
-      </View>
-    </Modal>
+      </KeyboardAvoidingView>
+    </View>
+  </TouchableWithoutFeedback>
+</Modal>
   );
 };
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(15, 23, 42, 0.45)', justifyContent: 'flex-end' },
-  sheet: { maxHeight: '94%', backgroundColor: colors.surface.canvas, borderTopLeftRadius: 24, borderTopRightRadius: 24, overflow: 'hidden' },
+  keyboardAvoid: { width: '100%', justifyContent: 'flex-end' },
+  sheet: { maxHeight: '90%', backgroundColor: colors.surface.canvas, borderTopLeftRadius: 24, borderTopRightRadius: 24, overflow: 'hidden' },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: spacing.base, backgroundColor: colors.surface.card, borderBottomWidth: 1, borderBottomColor: colors.surface.border },
   title: { fontSize: typography.sizes.title, fontWeight: typography.weights.bold, color: colors.text.primary },
   content: { padding: spacing.base, gap: spacing.sm },
