@@ -23,6 +23,7 @@ import { ShoppingLine, formatQty } from '../../services/stocks/stockCore';
 import { StockRecord } from '../../services/stocks/stockRepo';
 import { Account } from '../../types/database';
 import { ACCOUNT_BRAND } from '../../theme/brand';
+import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
 import { colors, radii, spacing, typography, formatFCFA } from '../../theme/tokens';
 
 interface Props {
@@ -44,6 +45,7 @@ export const RestockModal: React.FC<Props> = ({
   onClose,
   onConfirm,
 }) => {
+  const keyboardHeight = useKeyboardHeight();
   const [amountPaid, setAmountPaid] = useState(0);
   const [accountId, setAccountId] = useState<string | null>(null);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
@@ -87,28 +89,24 @@ export const RestockModal: React.FC<Props> = ({
   return (
     <Modal visible={visible} animationType="slide" transparent statusBarTranslucent onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.backdrop}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.keyboardAvoid}
-          >
-            <View style={styles.sheet}>
-              <View style={styles.header}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.title}>Valider les courses</Text>
-                  <Text style={styles.subtitle}>
-                    {lines.length} produit{lines.length > 1 ? 's' : ''} à réapprovisionner
-                  </Text>
-                </View>
-                <Pressable
-                  onPress={onClose}
-                  hitSlop={10}
-                  accessibilityRole="button"
-                  accessibilityLabel="Fermer"
-                >
-                  <X size={22} color={colors.text.primary} />
-                </Pressable>
+        <View style={[styles.backdrop, keyboardHeight > 0 && { paddingBottom: keyboardHeight }]}>
+          <View style={[styles.sheet, keyboardHeight > 0 && { maxHeight: '96%' }]}>
+            <View style={styles.header}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.title}>Valider les courses</Text>
+                <Text style={styles.subtitle}>
+                  {lines.length} produit{lines.length > 1 ? 's' : ''} à réapprovisionner
+                </Text>
               </View>
+              <Pressable
+                onPress={onClose}
+                hitSlop={10}
+                accessibilityRole="button"
+                accessibilityLabel="Fermer"
+              >
+                <X size={22} color={colors.text.primary} />
+              </Pressable>
+            </View>
 
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
             {/* Montant réellement payé */}
@@ -230,10 +228,9 @@ export const RestockModal: React.FC<Props> = ({
             </Pressable>
           </View>
         </View>
-      </KeyboardAvoidingView>
-    </View>
-  </TouchableWithoutFeedback>
-</Modal>
+      </View>
+    </TouchableWithoutFeedback>
+  </Modal>
   );
 };
 

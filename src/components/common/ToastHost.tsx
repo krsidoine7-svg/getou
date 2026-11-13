@@ -16,7 +16,7 @@ const STYLE: Record<ToastKind, { bg: string; border: string; tint: string; Icon:
 };
 
 const TOAST_TOP = Platform.OS === 'android'
-  ? (StatusBar.currentHeight ?? 24) + spacing.sm
+  ? Math.max(StatusBar.currentHeight ?? 0, 44) + spacing.sm
   : Platform.OS === 'ios'
   ? 48
   : spacing.base;

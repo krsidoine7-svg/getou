@@ -29,6 +29,7 @@ import {
   defaultTarget,
 } from '../../services/stocks/stockCore';
 import { StockRecord } from '../../services/stocks/stockRepo';
+import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
 import { colors, radii, spacing, typography, formatFCFA } from '../../theme/tokens';
 
 interface Props {
@@ -44,6 +45,7 @@ export const StockEditorModal: React.FC<Props> = ({
   onClose,
   onSubmit,
 }) => {
+  const keyboardHeight = useKeyboardHeight();
   const [name, setName] = useState('');
   const [category, setCategory] = useState<StockCategory>('FOOD');
   const [unit, setUnit] = useState<string>('kg');
@@ -103,25 +105,21 @@ export const StockEditorModal: React.FC<Props> = ({
   return (
     <Modal visible={visible} animationType="slide" transparent statusBarTranslucent onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.backdrop}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.keyboardAvoid}
-          >
-            <View style={styles.sheet}>
-              <View style={styles.header}>
-                <Text style={styles.title}>
-                  {stockToEdit ? 'Modifier le produit' : 'Nouveau produit en stock'}
-                </Text>
-                <Pressable
-                  onPress={onClose}
-                  hitSlop={10}
-                  accessibilityRole="button"
-                  accessibilityLabel="Fermer"
-                >
-                  <X size={22} color={colors.text.primary} />
-                </Pressable>
-              </View>
+        <View style={[styles.backdrop, keyboardHeight > 0 && { paddingBottom: keyboardHeight }]}>
+          <View style={[styles.sheet, keyboardHeight > 0 && { maxHeight: '96%' }]}>
+            <View style={styles.header}>
+              <Text style={styles.title}>
+                {stockToEdit ? 'Modifier le produit' : 'Nouveau produit en stock'}
+              </Text>
+              <Pressable
+                onPress={onClose}
+                hitSlop={10}
+                accessibilityRole="button"
+                accessibilityLabel="Fermer"
+              >
+                <X size={22} color={colors.text.primary} />
+              </Pressable>
+            </View>
 
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
             {/* Nom */}
@@ -317,10 +315,9 @@ export const StockEditorModal: React.FC<Props> = ({
             </Pressable>
           </View>
         </View>
-      </KeyboardAvoidingView>
-    </View>
-  </TouchableWithoutFeedback>
-</Modal>
+      </View>
+    </TouchableWithoutFeedback>
+  </Modal>
   );
 };
 

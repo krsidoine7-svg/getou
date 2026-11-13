@@ -26,6 +26,7 @@ import { showToast } from '../../store/useToastStore';
 import { DebtType } from '../../services/debts/debtCore';
 import { addDays, toDayString, parseDay } from '../../services/agenda/deadlineCore';
 import { ACCOUNT_BRAND } from '../../theme/brand';
+import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
 import { colors, radii, spacing, typography, formatFCFA } from '../../theme/tokens';
 
 interface Props {
@@ -35,6 +36,7 @@ interface Props {
 }
 
 export const DebtEditorModal: React.FC<Props> = ({ visible, initialType = 'CREDIT', onClose }) => {
+  const keyboardHeight = useKeyboardHeight();
   const { currentUser } = useAuthStore();
   const { summary } = useWalletStore();
   const { addDebt } = useCommitmentStore();
@@ -90,18 +92,14 @@ export const DebtEditorModal: React.FC<Props> = ({ visible, initialType = 'CREDI
   return (
     <Modal visible={visible} animationType="slide" transparent statusBarTranslucent onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.backdrop}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.keyboardAvoid}
-          >
-            <View style={styles.sheet}>
-              <View style={styles.header}>
-                <Text style={styles.title}>Nouvel engagement</Text>
-                <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel="Fermer">
-                  <X size={22} color={colors.text.primary} />
-                </Pressable>
-              </View>
+        <View style={[styles.backdrop, keyboardHeight > 0 && { paddingBottom: keyboardHeight }]}>
+          <View style={[styles.sheet, keyboardHeight > 0 && { maxHeight: '96%' }]}>
+            <View style={styles.header}>
+              <Text style={styles.title}>Nouvel engagement</Text>
+              <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel="Fermer">
+                <X size={22} color={colors.text.primary} />
+              </Pressable>
+            </View>
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
             <View style={styles.segment} accessibilityRole="radiogroup">
               {[
@@ -175,10 +173,9 @@ export const DebtEditorModal: React.FC<Props> = ({ visible, initialType = 'CREDI
             </Pressable>
           </View>
         </View>
-      </KeyboardAvoidingView>
-    </View>
-  </TouchableWithoutFeedback>
-</Modal>
+      </View>
+    </TouchableWithoutFeedback>
+  </Modal>
   );
 };
 

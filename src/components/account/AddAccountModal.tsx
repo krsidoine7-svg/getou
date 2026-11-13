@@ -26,6 +26,7 @@ import { parseAmountInput, formatAmountInput } from '../transaction/amountFormat
 import { ACCOUNT_TYPE_LABELS } from '../../services/dashboard/dashboardData';
 import { ACCOUNT_BRAND } from '../../theme/brand';
 import { AccountSubType, AccountType } from '../../types/database';
+import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
 import { colors, radii, spacing, typography, formatFCFA } from '../../theme/tokens';
 
 const TYPES: AccountType[] = ['WAVE', 'MOMO', 'ORANGE', 'BANK', 'CASH'];
@@ -48,6 +49,7 @@ interface AddAccountModalProps {
 }
 
 export const AddAccountModal: React.FC<AddAccountModalProps> = ({ visible, onClose }) => {
+  const keyboardHeight = useKeyboardHeight();
   const { currentUser, recordActivity } = useAuthStore();
   const { summary, createAccount, isLoading } = useWalletStore();
   const [type, setType] = useState<AccountType>('WAVE');
@@ -88,18 +90,14 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({ visible, onClo
   return (
     <Modal visible={visible} animationType="slide" transparent statusBarTranslucent onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.backdrop}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.keyboardAvoid}
-          >
-            <View style={styles.sheet}>
-              <View style={styles.header}>
-                <Text style={styles.title}>Nouveau compte</Text>
-                <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel="Fermer">
-                  <X size={22} color={colors.text.primary} />
-                </Pressable>
-              </View>
+        <View style={[styles.backdrop, keyboardHeight > 0 && { paddingBottom: keyboardHeight }]}>
+          <View style={[styles.sheet, keyboardHeight > 0 && { maxHeight: '96%' }]}>
+            <View style={styles.header}>
+              <Text style={styles.title}>Nouveau compte</Text>
+              <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel="Fermer">
+                <X size={22} color={colors.text.primary} />
+              </Pressable>
+            </View>
 
               <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
             <Text style={styles.label}>Opérateur</Text>
@@ -188,10 +186,9 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({ visible, onClo
             </Pressable>
           </View>
         </View>
-      </KeyboardAvoidingView>
-    </View>
-  </TouchableWithoutFeedback>
-</Modal>
+      </View>
+    </TouchableWithoutFeedback>
+  </Modal>
   );
 };
 

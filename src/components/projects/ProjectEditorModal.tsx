@@ -28,6 +28,7 @@ import { ACCOUNT_TYPE_LABELS } from '../../services/dashboard/dashboardData';
 import { toDayString, parseDay } from '../../services/agenda/deadlineCore';
 import { ACCOUNT_BRAND } from '../../theme/brand';
 import { AccountType } from '../../types/database';
+import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
 import { colors, radii, spacing, typography, formatFCFA } from '../../theme/tokens';
 
 const PRIORITIES: ProjectPriority[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
@@ -39,6 +40,7 @@ interface Props {
 }
 
 export const ProjectEditorModal: React.FC<Props> = ({ visible, onClose }) => {
+  const keyboardHeight = useKeyboardHeight();
   const { currentUser } = useAuthStore();
   const { summary } = useWalletStore();
   const { addProject } = useCommitmentStore();
@@ -96,18 +98,14 @@ export const ProjectEditorModal: React.FC<Props> = ({ visible, onClose }) => {
   return (
     <Modal visible={visible} animationType="slide" transparent statusBarTranslucent onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.backdrop}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.keyboardAvoid}
-          >
-            <View style={styles.sheet}>
-              <View style={styles.header}>
-                <Text style={styles.headerTitle}>Nouveau projet</Text>
-                <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel="Fermer">
-                  <X size={22} color={colors.text.primary} />
-                </Pressable>
-              </View>
+        <View style={[styles.backdrop, keyboardHeight > 0 && { paddingBottom: keyboardHeight }]}>
+          <View style={[styles.sheet, keyboardHeight > 0 && { maxHeight: '96%' }]}>
+            <View style={styles.header}>
+              <Text style={styles.headerTitle}>Nouveau projet</Text>
+              <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel="Fermer">
+                <X size={22} color={colors.text.primary} />
+              </Pressable>
+            </View>
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
             <View style={styles.field}>
               <Target size={18} color={colors.text.secondary} />
@@ -190,10 +188,9 @@ export const ProjectEditorModal: React.FC<Props> = ({ visible, onClose }) => {
             </Pressable>
           </View>
         </View>
-      </KeyboardAvoidingView>
-    </View>
-  </TouchableWithoutFeedback>
-</Modal>
+      </View>
+    </TouchableWithoutFeedback>
+  </Modal>
   );
 };
 

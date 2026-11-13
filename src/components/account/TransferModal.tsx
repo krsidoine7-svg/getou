@@ -27,6 +27,7 @@ import { useWalletStore } from '../../store/useWalletStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { showToast } from '../../store/useToastStore';
 import { validateTransferInput } from '../../services/account/transferCore';
+import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
 import { colors, radii, spacing, typography, formatFCFA } from '../../theme/tokens';
 
 interface TransferModalProps {
@@ -38,6 +39,7 @@ interface TransferModalProps {
 }
 
 export const TransferModal: React.FC<TransferModalProps> = ({ visible, onClose, initialFromId, onDone }) => {
+  const keyboardHeight = useKeyboardHeight();
   const { currentUser, recordActivity } = useAuthStore();
   const { summary, transfer, isLoading } = useWalletStore();
   const accounts = summary.accounts.filter((a) => a.is_archived === 0);
@@ -92,21 +94,17 @@ export const TransferModal: React.FC<TransferModalProps> = ({ visible, onClose, 
   return (
     <Modal visible={visible} animationType="slide" transparent statusBarTranslucent onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.backdrop}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.keyboardAvoid}
-          >
-            <View style={styles.sheet}>
-              <View style={styles.header}>
-                <View style={styles.headerIcon}>
-                  <ArrowLeftRight size={18} color={colors.primary.DEFAULT} />
-                </View>
-                <Text style={styles.title}>Virement interne</Text>
-                <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel="Fermer">
-                  <X size={22} color={colors.text.primary} />
-                </Pressable>
+        <View style={[styles.backdrop, keyboardHeight > 0 && { paddingBottom: keyboardHeight }]}>
+          <View style={[styles.sheet, keyboardHeight > 0 && { maxHeight: '96%' }]}>
+            <View style={styles.header}>
+              <View style={styles.headerIcon}>
+                <ArrowLeftRight size={18} color={colors.primary.DEFAULT} />
               </View>
+              <Text style={styles.title}>Virement interne</Text>
+              <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel="Fermer">
+                <X size={22} color={colors.text.primary} />
+              </Pressable>
+            </View>
 
           {accounts.length < 2 ? (
             <View style={styles.info}>
@@ -181,10 +179,9 @@ export const TransferModal: React.FC<TransferModalProps> = ({ visible, onClose, 
             </Pressable>
           </View>
         </View>
-      </KeyboardAvoidingView>
-    </View>
-  </TouchableWithoutFeedback>
-</Modal>
+      </View>
+    </TouchableWithoutFeedback>
+  </Modal>
   );
 };
 

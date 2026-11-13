@@ -22,6 +22,7 @@ import {
 import { X, TriangleAlert, Trash2, Check, CalendarDays, AlarmClock, Repeat, ChevronLeft, ChevronRight, CalendarPlus, BellRing } from 'lucide-react-native';
 import { AmountCard } from '../transaction/AmountCard';
 import { KIND_VISUALS, PRIORITY_LABELS } from './deadlineVisuals';
+import { useKeyboardHeight } from '../../hooks/useKeyboardHeight';
 import { useAgendaStore } from '../../store/useAgendaStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useWalletStore } from '../../store/useWalletStore';
@@ -63,6 +64,7 @@ interface Props {
 }
 
 export const DeadlineEditorModal: React.FC<Props> = ({ visible, onClose, editing, initialDay }) => {
+  const keyboardHeight = useKeyboardHeight();
   const { currentUser, recordActivity } = useAuthStore();
   const { summary } = useWalletStore();
   const { save, remove } = useAgendaStore();
@@ -146,19 +148,15 @@ export const DeadlineEditorModal: React.FC<Props> = ({ visible, onClose, editing
   return (
     <Modal visible={visible} animationType="slide" transparent statusBarTranslucent onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.backdrop}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.keyboardAvoid}
-          >
-            <View style={styles.sheet}>
-              <View style={styles.header}>
-                <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel="Fermer">
-                  <X size={22} color={colors.text.primary} />
-                </Pressable>
-                <Text style={styles.headerTitle}>{editing ? "Modifier l'échéance" : 'Nouvelle échéance'}</Text>
-                <View style={{ width: 22 }} />
-              </View>
+        <View style={[styles.backdrop, keyboardHeight > 0 && { paddingBottom: keyboardHeight }]}>
+          <View style={[styles.sheet, keyboardHeight > 0 && { maxHeight: '96%' }]}>
+            <View style={styles.header}>
+              <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel="Fermer">
+                <X size={22} color={colors.text.primary} />
+              </Pressable>
+              <Text style={styles.headerTitle}>{editing ? "Modifier l'échéance" : 'Nouvelle échéance'}</Text>
+              <View style={{ width: 22 }} />
+            </View>
 
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
             <AmountCard label="Montant à honorer" amount={amount} onChange={setAmount} presets={[5000, 10000, 25000, 50000]} tone="expense" />
@@ -318,10 +316,9 @@ export const DeadlineEditorModal: React.FC<Props> = ({ visible, onClose, editing
             </View>
           </View>
         </View>
-      </KeyboardAvoidingView>
-    </View>
-  </TouchableWithoutFeedback>
-</Modal>
+      </View>
+    </TouchableWithoutFeedback>
+  </Modal>
   );
 };
 

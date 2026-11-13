@@ -25,6 +25,11 @@
         "POST_NOTIFICATIONS"
       ]
     },
+    "androidStatusBar": {
+      "barStyle": "dark-content",
+      "backgroundColor": "#F8FAFC",
+      "translucent": true
+    },
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro",

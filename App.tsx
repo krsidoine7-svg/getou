@@ -46,8 +46,9 @@ const IS_AUTH_POPUP = WebBrowser.maybeCompleteAuthSession().type === 'success';
 /**
  * Hauteur de la barre d'état Android pour éviter que le haut des écrans et les
  * notifications ne soient tronqués derrière la caméra ou les icônes système (WiFi, horloge).
+ * Utilise Math.max avec 44 dp pour couvrir les caméras en poinçon et encoches modernes.
  */
-const ANDROID_STATUS_BAR = Platform.OS === 'android' ? (StatusBar.currentHeight ?? 24) : 0;
+const ANDROID_STATUS_BAR = Platform.OS === 'android' ? Math.max(StatusBar.currentHeight ?? 0, 44) : 0;
 
 /** Durée minimale d'affichage du splash, pour éviter un simple flash à l'écran. */
 const MIN_SPLASH_MS = 900;
