@@ -8,6 +8,13 @@ import type { AlertKind, AlertLevel, AlertRecord, BudgetCrossing, BudgetSnapshot
 import { listBudgets } from '../budget/budgetRepo.ts';
 import { periodRange } from '../budget/budgetCalc.ts';
 import { daysUntil, dueLabel, reminderDate } from '../agenda/deadlineCore.ts';
+import {
+  pickBudgetCoachQuote,
+  pickIncomeCoachQuote,
+  pickStaleProjectCoachQuote,
+  pickShoppingCoachQuote,
+  getWeekKey,
+} from '../coach/coachCore.ts';
 
 export interface SqlDb {
   all<T>(sql: string, params?: unknown[]): Promise<T[]>;
@@ -110,6 +117,7 @@ export async function recordBudgetAlerts(
     const name = b.category_name ?? (b.period === 'DAY' ? 'Plafond journalier' : 'Budget mensuel global');
     const pct = Math.round((b.spent / b.limit) * 100);
     const over = crossing.level === 'over';
+    const coachAdvice = pickBudgetCoachQuote(over ? 'over' : 'warning');
     const alert = await insertAlertOnce(
       db,
       {
@@ -118,11 +126,11 @@ export async function recordBudgetAlerts(
         level: over ? 'CRITICAL' : 'WARNING',
         title: over ? `Plafond dépassé : ${name}` : `Seuil ${Math.round(b.alert_threshold * 100)} % atteint : ${name}`,
         body: over
-          ? `${fcfa(b.spent)} dépensés pour un plafond de ${fcfa(b.limit)} (+${fcfa(b.spent - b.limit)}).`
-          : `${fcfa(b.spent)} / ${fcfa(b.limit)} consommés (${pct} %). Il reste ${fcfa(b.limit - b.spent)}.`,
+          ? `${fcfa(b.spent)} dépensés pour un plafond de ${fcfa(b.limit)} (+${fcfa(b.spent - b.limit)}).\nCoach : ${coachAdvice}`
+          : `${fcfa(b.spent)} / ${fcfa(b.limit)} consommés (${pct} %). Il reste ${fcfa(b.limit - b.spent)}.\nCoach : ${coachAdvice}`,
         refId: b.id,
         dedupeKey: crossing.dedupeKey,
-        meta: { spent: b.spent, limit: b.limit, ratio: b.spent / b.limit },
+        meta: { spent: b.spent, limit: b.limit, ratio: b.spent / b.limit, coachAdvice },
         createdAt: now.toISOString(),
       },
       newId
@@ -210,6 +218,118 @@ export async function recordBackupAlert(db: SqlDb, userId: string, email: string
       title: 'Sauvegarde Google Drive réussie',
       body: `${size} enregistrés dans l'espace privé de GERETOU sur ${email}.`,
       dedupeKey: null,
+    },
+    newId
+  );
+}
+
+// ── Coach Financier Ivoirien (Nouchi) ──────────────────
+
+/**
+ * Alerte d'encouragement / rappel d'épargne après une rentrée de fonds (djaï).
+ */
+export async function recordCoachIncomeAlert(
+  db: SqlDb,
+  userId: string,
+  amount: number,
+  newId: () => string,
+  now: Date = new Date()
+): Promise<AlertRecord | null> {
+  const quote = pickIncomeCoachQuote();
+  return insertAlertOnce(
+    db,
+    {
+      userId,
+      kind: 'INFO',
+      level: 'SUCCESS',
+      title: 'Coach Nouchi : Djaï rentré ! 💰',
+      body: `${quote}\n(+${fcfa(amount)} reçus)`,
+      dedupeKey: null,
+      meta: { amount, kind: 'COACH_INCOME' },
+      createdAt: now.toISOString(),
+    },
+    newId
+  );
+}
+
+/**
+ * Rappels de projets actifs sans aucun versement / avancement depuis plus de 3 jours.
+ * Dédoublonné par semaine pour ne pas spammer.
+ */
+export async function syncCoachStaleProjectsAlerts(
+  db: SqlDb,
+  userId: string,
+  newId: () => string,
+  now: Date = new Date()
+): Promise<AlertRecord[]> {
+  const weekKey = getWeekKey(now);
+  const rows = await db.all<{ id: string; title: string; locked_amount: number; target_amount: number; updated_at: string; created_at: string }>(
+    `SELECT id, title, locked_amount, target_amount, updated_at, created_at
+     FROM projects
+     WHERE user_id = ? AND status = 'ACTIVE' AND locked_amount < target_amount;`,
+    [userId]
+  );
+  const threeDaysAgo = now.getTime() - 3 * 86_400_000;
+  const created: AlertRecord[] = [];
+  for (const p of rows) {
+    const lastActive = new Date(p.updated_at || p.created_at).getTime();
+    if (lastActive <= threeDaysAgo) {
+      const alert = await insertAlertOnce(
+        db,
+        {
+          userId,
+          kind: 'INFO',
+          level: 'WARNING',
+          title: 'Coach Nouchi : Ton projet dort ! 🎯',
+          body: pickStaleProjectCoachQuote(p.title),
+          refId: p.id,
+          dedupeKey: `coach:stale_project:${p.id}:${weekKey}`,
+          meta: { projectId: p.id, title: p.title, kind: 'COACH_PROJECT' },
+          createdAt: now.toISOString(),
+        },
+        newId
+      );
+      if (alert) created.push(alert);
+    }
+  }
+  return created;
+}
+
+/**
+ * Rappels des articles de courses ou stocks en rupture / sous le seuil minimum.
+ * Dédoublonné par semaine.
+ */
+export async function syncCoachShoppingAlerts(
+  db: SqlDb,
+  userId: string,
+  newId: () => string,
+  now: Date = new Date()
+): Promise<AlertRecord | null> {
+  const weekKey = getWeekKey(now);
+  const lowStocks = await db.all<{ name: string }>(
+    `SELECT name FROM stocks WHERE user_id = ? AND current_qty <= min_threshold LIMIT 3;`,
+    [userId]
+  );
+  if (lowStocks.length === 0) {
+    const grocery = await db.get<{ name: string }>(
+      `SELECT s.name FROM grocery_items g JOIN stocks s ON s.id = g.stock_id WHERE s.user_id = ? AND g.is_purchased = 0 LIMIT 1;`,
+      [userId]
+    );
+    if (!grocery) return null;
+    lowStocks.push(grocery);
+  }
+  const sampleName = lowStocks.map((s) => s.name).join(', ');
+  return insertAlertOnce(
+    db,
+    {
+      userId,
+      kind: 'INFO',
+      level: 'INFO',
+      title: 'Coach Nouchi : Ravitaillement prévu 🛒',
+      body: pickShoppingCoachQuote(sampleName),
+      dedupeKey: `coach:shopping:${userId}:${weekKey}`,
+      meta: { kind: 'COACH_SHOPPING' },
+      createdAt: now.toISOString(),
     },
     newId
   );

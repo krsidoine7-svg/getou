@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView, ScrollView, View, Text, Pressable, Switch, StyleSheet, ActivityIndicator } from 'react-native';
-import { ArrowLeft, BellRing, Lock, ReceiptText, ChartPie, CloudUpload, EyeOff, Send, ShieldCheck, Smartphone } from 'lucide-react-native';
+import { ArrowLeft, BellRing, Lock, ReceiptText, ChartPie, CloudUpload, EyeOff, Send, ShieldCheck, Smartphone, Sparkles } from 'lucide-react-native';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useAlertStore } from '../../store/useAlertStore';
 import { useAgendaStore } from '../../store/useAgendaStore';
@@ -29,6 +29,27 @@ const GROUPS: { title: string; Icon: typeof BellRing; items: { key: keyof AlertP
     items: [
       { key: 'budgetThreshold', label: "Alerte au seuil d'un plafond", hint: 'Dès que 80, 85 ou 90 % du plafond est atteint' },
       { key: 'budgetOver', label: 'Alerte de dépassement 100 %', hint: 'Dès qu’un plafond est dépassé' },
+    ],
+  },
+  {
+    title: 'Coach Financier Nouchi (Motivation & Rappels)',
+    Icon: Sparkles,
+    items: [
+      {
+        key: 'coachIncome',
+        label: "Rappels d'épargne après entrée de djaï",
+        hint: 'Conseils nouchi motivants dès qu’une entrée d’argent est enregistrée',
+      },
+      {
+        key: 'coachStaleProjects',
+        label: 'Rappels projets sans avancement',
+        hint: 'Notification stimulante quand un projet actif dort depuis plusieurs jours',
+      },
+      {
+        key: 'coachShoppingList',
+        label: 'Rappels courses & réapprovisionnements',
+        hint: 'Alerte pour ravitailler la maison avant d’être à sec',
+      },
     ],
   },
   {
@@ -67,7 +88,10 @@ export const NotificationSettingsScreen: React.FC = () => {
 
   const sendTest = async () => {
     setBusy(true);
-    const ok = await notifyNow('Test GERETOU', 'Les notifications fonctionnent. Exemple : facture de 28 000 FCFA à régler demain.');
+    const ok = await notifyNow(
+      'Coach Nouchi : Test de notification 💰',
+      'Tu as eu le djaï ! Tu ne vas pas garder quoi ? Ou bien tu veux faire paiya inconscient là ?'
+    );
     setBusy(false);
     showToast(ok ? { kind: 'success', title: 'Notification envoyée', message: 'Regardez la barre de notifications du téléphone.' } : { kind: 'error', title: 'Envoi impossible', message: "Autorisez d'abord les notifications." });
   };

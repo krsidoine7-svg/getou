@@ -31,6 +31,12 @@ export interface AlertPrefs {
   backupSuccess: boolean;
   /** Masque les montants dans le texte des notifications (écran verrouillé). */
   hideAmounts: boolean;
+  /** Coach Financier Nouchi : Rappels après entrée d'argent (djaï). */
+  coachIncome: boolean;
+  /** Coach Financier Nouchi : Rappels projets sans avancement. */
+  coachStaleProjects: boolean;
+  /** Coach Financier Nouchi : Rappels stocks et liste de courses. */
+  coachShoppingList: boolean;
 }
 
 export const DEFAULT_ALERT_PREFS: AlertPrefs = {
@@ -39,6 +45,9 @@ export const DEFAULT_ALERT_PREFS: AlertPrefs = {
   budgetOver: true,
   backupSuccess: false,
   hideAmounts: false,
+  coachIncome: true,
+  coachStaleProjects: true,
+  coachShoppingList: true,
 };
 
 export const RETENTION_DAYS = 90;

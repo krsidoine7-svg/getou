@@ -15,7 +15,10 @@ import {
   purgeOldAlerts,
   recordBackupAlert,
   recordBudgetAlerts,
+  recordCoachIncomeAlert,
   resolveAlert,
+  syncCoachShoppingAlerts,
+  syncCoachStaleProjectsAlerts,
   syncDeadlineAlerts,
   unreadCount,
 } from '../services/alerts/alertRepo';
@@ -49,6 +52,8 @@ interface AlertState {
   resolve: (userId: string, id: string, resolution: string) => Promise<void>;
   /** À appeler après chaque dépense enregistrée. */
   afterExpense: (userId: string, amount: number, categoryId: string | null) => Promise<void>;
+  /** À appeler après chaque entrée d'argent (djaï) enregistrée. */
+  afterIncome: (userId: string, amount: number) => Promise<void>;
   /** À appeler après chaque sauvegarde Drive réussie. */
   afterBackup: (userId: string, email: string, bytes: number) => Promise<void>;
 }
@@ -65,6 +70,17 @@ export const useAlertStore = create<AlertState>((set, get) => ({
       const db = await sqlDb();
       await purgeOldAlerts(db, userId);
       await syncDeadlineAlerts(db, userId, newId);
+      const staleProjectAlerts = await syncCoachStaleProjectsAlerts(db, userId, newId);
+      const shoppingAlert = await syncCoachShoppingAlerts(db, userId, newId);
+      const prefs = await getAlertPrefs();
+      if (prefs.coachStaleProjects) {
+        for (const al of staleProjectAlerts) {
+          await notifyNow(al.title, al.body, { kind: 'coach_project', alertId: al.id }).catch(() => false);
+        }
+      }
+      if (prefs.coachShoppingList && shoppingAlert) {
+        await notifyNow(shoppingAlert.title, shoppingAlert.body, { kind: 'coach_shopping', alertId: shoppingAlert.id }).catch(() => false);
+      }
       set({ alerts: await listAlerts(db, userId), unread: await unreadCount(db, userId), isLoading: false });
     } catch (e) {
       console.error('[GERETOU] Lecture des alertes impossible', e);
@@ -107,6 +123,19 @@ export const useAlertStore = create<AlertState>((set, get) => ({
       if (created.length) await get().refresh(userId);
     } catch (e) {
       console.error('[GERETOU] Calcul des alertes de budget impossible', e);
+    }
+  },
+
+  afterIncome: async (userId, amount) => {
+    try {
+      const alert = await recordCoachIncomeAlert(await sqlDb(), userId, amount, newId);
+      const prefs = await getAlertPrefs();
+      if (alert && prefs.coachIncome) {
+        await notifyNow(alert.title, alert.body, { kind: 'coach_income', alertId: alert.id }).catch(() => false);
+      }
+      if (alert) await get().refresh(userId);
+    } catch (e) {
+      console.error('[GERETOU] Alerte d’entrée d’argent impossible', e);
     }
   },
 

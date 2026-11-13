@@ -17,6 +17,7 @@ import {
   CircleCheck,
   BellOff,
   ArrowRight,
+  Sparkles,
 } from 'lucide-react-native';
 import { BudgetGauge } from '../../components/budget/BudgetGauge';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -45,7 +46,7 @@ const ICONS: Record<AlertKind, { Icon: typeof Info; fg: string; bg: string }> = 
   DEADLINE: { Icon: CalendarClock, fg: colors.accent.danger, bg: colors.accent.dangerBg },
   BUDGET: { Icon: TriangleAlert, fg: colors.accent.warning, bg: colors.accent.warningBg },
   BACKUP: { Icon: CloudUpload, fg: colors.primary.DEFAULT, bg: colors.primary.subtle },
-  INFO: { Icon: Info, fg: colors.text.secondary, bg: colors.surface.muted },
+  INFO: { Icon: Sparkles, fg: colors.primary.DEFAULT, bg: colors.primary.subtle },
 };
 
 function formatAlertTime(iso: string, now: Date): string {
@@ -242,6 +243,36 @@ export const NotificationsScreen: React.FC = () => {
                           </Pressable>
                           <Pressable onPress={() => uid && resolve(uid, a.id, 'Ignorée')} accessibilityRole="button" style={styles.ghostAction}>
                             <Text style={styles.ghostActionText}>Ignorer</Text>
+                          </Pressable>
+                        </View>
+                      ) : a.kind === 'INFO' && a.title.toLowerCase().includes('projet') ? (
+                        <View style={styles.actionsRow}>
+                          <Pressable onPress={() => { open(a); navigate('PROJECTS'); }} accessibilityRole="button" style={styles.primaryAction}>
+                            <Text style={styles.primaryActionText}>Voir mes projets</Text>
+                            <ArrowRight size={14} color={colors.text.inverted} />
+                          </Pressable>
+                          <Pressable onPress={() => uid && resolve(uid, a.id, 'Vu')} accessibilityRole="button" style={styles.ghostAction}>
+                            <Text style={styles.ghostActionText}>Compris</Text>
+                          </Pressable>
+                        </View>
+                      ) : a.kind === 'INFO' && (a.title.toLowerCase().includes('ravitaillement') || a.title.toLowerCase().includes('courses')) ? (
+                        <View style={styles.actionsRow}>
+                          <Pressable onPress={() => { open(a); switchTab('STOCKS'); }} accessibilityRole="button" style={styles.primaryAction}>
+                            <Text style={styles.primaryActionText}>Voir les stocks</Text>
+                            <ArrowRight size={14} color={colors.text.inverted} />
+                          </Pressable>
+                          <Pressable onPress={() => uid && resolve(uid, a.id, 'Vu')} accessibilityRole="button" style={styles.ghostAction}>
+                            <Text style={styles.ghostActionText}>Compris</Text>
+                          </Pressable>
+                        </View>
+                      ) : a.kind === 'INFO' && a.title.toLowerCase().includes('djaï') ? (
+                        <View style={styles.actionsRow}>
+                          <Pressable onPress={() => { open(a); navigate('PROJECTS'); }} accessibilityRole="button" style={styles.primaryAction}>
+                            <Text style={styles.primaryActionText}>Épargner pour un projet</Text>
+                            <ArrowRight size={14} color={colors.text.inverted} />
+                          </Pressable>
+                          <Pressable onPress={() => uid && resolve(uid, a.id, 'Vu')} accessibilityRole="button" style={styles.ghostAction}>
+                            <Text style={styles.ghostActionText}>C'est noté</Text>
                           </Pressable>
                         </View>
                       ) : null}

@@ -6,11 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#F8FAFC"
-    },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.geretou.app",
@@ -40,6 +35,14 @@
       "shortName": "GERETOU"
     },
     "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F8FAFC",
+          "image": "./assets/splash.png",
+          "resizeMode": "contain"
+        }
+      ],
       [
         "expo-local-authentication",
         {

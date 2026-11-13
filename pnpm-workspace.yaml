@@ -1,0 +1,3 @@
+minimumReleaseAgeExclude:
+  - expo-sqlite@58.0.17
+  - expo@58.0.25

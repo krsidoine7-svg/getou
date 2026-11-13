@@ -85,6 +85,8 @@ export const useTransactionStore = create<TransactionState>((set, get) => ({
       set({ isLoading: true, error: null });
       const result = await TransactionService.recordIncome(params);
       await get().fetchRecentTransactions(params.userId);
+      // Coach Nouchi : rappel d'épargne et notification djaï rentré
+      await useAlertStore.getState().afterIncome(params.userId, params.amount);
       set({ isLoading: false });
       return result;
     } catch (err: any) {
